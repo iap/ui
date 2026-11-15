@@ -8,7 +8,7 @@ gaps.
 
 ## The suites
 
-### `scripts/verify.mjs` — 69 library checks
+### `scripts/verify.mjs` — 70 library checks
 
 Two phases, exits non-zero on any failure, prints a JSON report. It deliberately does **not**
 re-assert the package promises (that is `check-contract.mjs`) or the baseline-gate resolution (that
@@ -75,7 +75,7 @@ package asserts that `npm pack` produced a real manifest, so a broken command re
 
 ### `scripts/verify-consumer.mjs` — `npm run verify:consumer`
 
-The consumer contract — 16 checks. Everything else in this repository verifies the library **as a
+The consumer contract — 17 checks. Everything else in this repository verifies the library **as a
 workspace**: the example apps resolve `@trade/ui` through npm's hoisted symlink, and `check:pack`
 inspects a tarball's *file list*. Neither can see whether a stranger who runs `npm install @trade/ui`
 gets a working package. A file present in `dist/` here but absent from the tarball loads perfectly in

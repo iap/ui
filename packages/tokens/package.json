@@ -4,6 +4,9 @@
   "private": false,
   "type": "module",
   "description": "Design tokens for @trade/ui — compiles tokens.json into static CSS custom properties and typed TS.",
+  "main": "./dist/tokens.cjs",
+  "module": "./dist/tokens.js",
+  "types": "./dist/tokens.d.ts",
   "files": [
     "dist",
     "LICENSE",
@@ -12,8 +15,14 @@
     "NOTICE"
   ],
   "exports": {
-    ".": "./dist/tokens.ts",
-    "./tokens.css": "./dist/tokens.css"
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js",
+      "require": "./dist/tokens.cjs"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens.ts": "./dist/tokens.ts",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "node build-tokens.mjs",

@@ -1,9 +1,11 @@
 # Releasing
 
-Two packages publish together: `@trade/tokens` first, then `@trade/ui`. **The order is a dependency** —
-`@trade/ui` re-exports the token contract and its stylesheets are generated from `@trade/tokens`
-output, so a release that publishes them the other way round leaves a window where the consumer-facing
-package refers to tokens that do not exist yet.
+Two packages publish together: `@trade/tokens` first, then `@trade/ui`. **The order is a build
+dependency, not a consumer-resolution one.** `@trade/ui` declares no runtime dependency on
+`@trade/tokens` and re-exports no token symbols; what couples them is that `packages/ui/build.mjs`
+reads `packages/tokens/dist/tokens.css` and concatenates it into `dist/ui.css`. The tokens build
+must therefore have run before the UI package is built and packed — publishing them the other way
+round would ship a UI stylesheet generated from a tokens build that did not exist yet.
 
 Nothing here is automated end to end, and that is deliberate: **the gate proves the preconditions, a
 human supplies the credentials.** No script in this repository holds a token or calls `npm publish`.

@@ -98,7 +98,7 @@ try {
   // summary still reported a full run.
   const artifacts = {
     'packages/ui': ['dist/index.js', 'dist/index.cjs', 'dist/index.d.ts', 'dist/ui.css'],
-    'packages/tokens': ['dist/tokens.css', 'dist/tokens.ts']
+    'packages/tokens': ['dist/tokens.css', 'dist/tokens.ts', 'dist/tokens.js', 'dist/tokens.cjs', 'dist/tokens.d.ts']
   };
   const missing = [];
   for (const [dir, files] of Object.entries(artifacts)) {
@@ -222,6 +222,18 @@ try {
   facts.tokensCss = require.resolve('@trade/tokens/tokens.css');
   facts.tokensCssSource = readFileSync(facts.tokensCss, 'utf8').slice(0, 400000);
 } catch (error) { facts.tokensError = String(error.message); }
+// The package entry, not just its stylesheet. #97: the only published entry used to be raw
+// TypeScript, so a bundler coped and require() did not. Both paths are exercised here.
+try {
+  const tokensEsm = await import('@trade/tokens');
+  facts.tokensEsm = Object.keys(tokensEsm).sort();
+  facts.tokensEsmVersion = tokensEsm.tokens?.version;
+} catch (error) { facts.tokensEsmError = String(error.message); }
+try {
+  const tokensCjs = require('@trade/tokens');
+  facts.tokensCjs = Object.keys(tokensCjs).sort();
+  facts.tokensCjsVersion = tokensCjs.tokens?.version;
+} catch (error) { facts.tokensCjsError = String(error.message); }
 // The package's other structural export: the per-component stylesheets under ./components/*, which a
 // consumer imports to ship only what it uses.
 try {
@@ -302,6 +314,15 @@ console.log('FACTS ' + JSON.stringify(facts));
     tokensOk ? `${facts.tokensCss.split(sep).pop()}, contains ${TOKEN_PROPERTY}` : facts.tokensError ?? String(facts.tokensCss ?? 'not resolved')
   );
 
+  const tokensEsmOk = Array.isArray(facts.tokensEsm) && facts.tokensEsm.includes('tokens') && Boolean(facts.tokensEsmVersion);
+  const tokensCjsOk = Array.isArray(facts.tokensCjs) && facts.tokensCjs.includes('tokens') && facts.tokensCjsVersion === facts.tokensEsmVersion;
+  check(
+    '@trade/tokens loads in ESM and CommonJS and exports the token object',
+    tokensEsmOk && tokensCjsOk,
+    facts.tokensEsmError ?? facts.tokensCjsError ??
+      `esm=${facts.tokensEsmVersion ?? 'n/a'} [${(facts.tokensEsm ?? []).join(', ') || 'none'}], cjs=${facts.tokensCjsVersion ?? 'n/a'} [${(facts.tokensCjs ?? []).join(', ') || 'none'}]`
+  );
+
   // The last structural export. `check:pack` compares the packed per-component stylesheet count
   // against the source set, but nothing resolved one the way a consumer does until this.
   const componentCssOk = insideConsumer(facts.componentCss) && String(facts.componentCssSource ?? '').includes(CSS_SELECTOR);
@@ -376,6 +397,7 @@ export const Element = () => <Button>Save</Button>;
     writeFileSync(
       join(consumer, 'use.tsx'),
       `import { Button, DataTable, Dialog, Menu, Popover, Select, Tabs, ThemeProvider, Tooltip, useTicks } from '@trade/ui';
+import { tokens } from '@trade/tokens';
 
 export type Surface = [
   typeof Button, typeof DataTable, typeof Dialog, typeof Menu, typeof Popover,
@@ -383,6 +405,7 @@ export type Surface = [
 ];
 
 export const element = <Button>Save</Button>;
+export type TokenVersion = typeof tokens.version;
 `
     );
     writeFileSync(
