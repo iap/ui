@@ -165,9 +165,34 @@ ${themeBlock('dark', '    ')}
 `;
 
 writeFileSync(resolve(outDir, 'tokens.css'), css, 'utf8');
+const tokenData = { ...t, version: pkg.version };
+const tokenJson = JSON.stringify(tokenData, null, 2);
+const banner = '// @trade/ui — generated from tokens.json. DO NOT EDIT BY HAND.';
+
+// `tokens.ts` stays as the readable source form; the compiled entries below are what a consumer's
+// resolver actually loads. Publishing only raw TypeScript (issue #97) worked for bundler-based
+// consumers and broke `require()` and every non-bundler resolver, which is the kind of gap the first
+// external consumer finds rather than the author.
 writeFileSync(
   resolve(outDir, 'tokens.ts'),
-  `// @trade/ui — generated from tokens.json. DO NOT EDIT BY HAND.\nexport const tokens = ${JSON.stringify({ ...t, version: pkg.version }, null, 2)} as const;\nexport type Tokens = typeof tokens;\nexport type ThemeName = keyof typeof tokens.themes;\nexport type ThemeRole = keyof (typeof tokens.themes)['${t.defaultTheme}'];\nexport default tokens;\n`,
+  `${banner}\nexport const tokens = ${tokenJson} as const;\nexport type Tokens = typeof tokens;\nexport type ThemeName = keyof typeof tokens.themes;\nexport type ThemeRole = keyof (typeof tokens.themes)['${t.defaultTheme}'];\nexport default tokens;\n`,
+  'utf8'
+);
+writeFileSync(
+  resolve(outDir, 'tokens.js'),
+  `${banner}\nexport const tokens = ${tokenJson};\nexport default tokens;\n`,
+  'utf8'
+);
+writeFileSync(
+  resolve(outDir, 'tokens.cjs'),
+  `${banner}\n'use strict';\nconst tokens = ${tokenJson};\nexports.tokens = tokens;\nexports.default = tokens;\n`,
+  'utf8'
+);
+// The same literal, in type position: `declare const tokens: {...}` narrows keys and values without
+// a compiler round-trip, so the declarations match the data exactly.
+writeFileSync(
+  resolve(outDir, 'tokens.d.ts'),
+  `${banner}\nexport declare const tokens: ${tokenJson};\nexport type Tokens = typeof tokens;\nexport type ThemeName = keyof typeof tokens.themes;\nexport type ThemeRole = keyof (typeof tokens.themes)['${t.defaultTheme}'];\nexport default tokens;\n`,
   'utf8'
 );
 
@@ -183,7 +208,7 @@ console.log(
   JSON.stringify(
     {
       ok: true,
-      out: ['dist/tokens.css', 'dist/tokens.ts'],
+      out: ['dist/tokens.css', 'dist/tokens.ts', 'dist/tokens.js', 'dist/tokens.cjs', 'dist/tokens.d.ts'],
       primitiveRefs: refLines.length,
       themes: themeNames,
       rolesPerTheme: roles.length,
