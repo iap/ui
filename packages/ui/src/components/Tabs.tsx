@@ -56,6 +56,7 @@ export function Tabs({ items, value, defaultValue, onChange, density, className 
       <div className="ui-tabs__list" role="tablist">
         {items.map((item, i) => {
           const selected = item.key === active;
+          const hasPanel = item.content != null;
           return (
             <button
               key={item.key}
@@ -66,7 +67,7 @@ export function Tabs({ items, value, defaultValue, onChange, density, className 
               role="tab"
               id={`${baseId}-tab-${item.key}`}
               aria-selected={selected}
-              aria-controls={`${baseId}-panel-${item.key}`}
+              aria-controls={hasPanel ? `${baseId}-panel-${item.key}` : undefined}
               tabIndex={selected ? 0 : -1}
               disabled={item.disabled}
               className="ui-tab"
@@ -79,22 +80,24 @@ export function Tabs({ items, value, defaultValue, onChange, density, className 
           );
         })}
       </div>
-      {items.map((item) => {
-        const selected = item.key === active;
-        return (
-          <div
-            key={item.key}
-            className="ui-tabs__panel"
-            role="tabpanel"
-            id={`${baseId}-panel-${item.key}`}
-            aria-labelledby={`${baseId}-tab-${item.key}`}
-            hidden={!selected}
-            tabIndex={selected ? 0 : undefined}
-          >
-            {item.content}
-          </div>
-        );
-      })}
+      {items
+        .filter((item) => item.content != null)
+        .map((item) => {
+          const selected = item.key === active;
+          return (
+            <div
+              key={item.key}
+              className="ui-tabs__panel"
+              role="tabpanel"
+              id={`${baseId}-panel-${item.key}`}
+              aria-labelledby={`${baseId}-tab-${item.key}`}
+              hidden={!selected}
+              tabIndex={selected ? 0 : undefined}
+            >
+              {item.content}
+            </div>
+          );
+        })}
     </div>
   );
 }

@@ -151,6 +151,22 @@ check(
   /role="tablist"/.test(markup) && /aria-selected="true"/.test(markup) && /aria-modal="true"/.test(markup),
   `tablist=${/role="tablist"/.test(markup)}, selected tab=${/aria-selected="true"/.test(markup)}, modal=${/aria-modal="true"/.test(markup)}`
 );
+// Tabs is also used as a switcher (the trading example passes no content and renders the region
+// itself). A tabpanel per item used to be emitted unconditionally, leaving an empty focusable
+// panel in the tab order; axe does not flag it, so only an explicit assertion catches it (#98).
+const switcherMarkup = renderToStaticMarkup(
+  h(ui.Tabs, {
+    items: [
+      { key: 'fills', label: 'Fills' },
+      { key: 'orders', label: 'Working orders' }
+    ]
+  })
+);
+check(
+  'SSR: a content-less tab switcher renders no empty tabpanel',
+  /role="tablist"/.test(switcherMarkup) && !/role="tabpanel"/.test(switcherMarkup) && !/aria-controls=/.test(switcherMarkup) && /role="tabpanel"/.test(markup) && /aria-controls="/.test(markup),
+  `switcher: tablist=${/role="tablist"/.test(switcherMarkup)}, panels=${(switcherMarkup.match(/role="tabpanel"/g) ?? []).length}, controls=${(switcherMarkup.match(/aria-controls=/g) ?? []).length}; content-bearing: panels=${(markup.match(/role="tabpanel"/g) ?? []).length}, controls=${(markup.match(/aria-controls="/g) ?? []).length}`
+);
 check(
   'SSR: non-modal popover is honest about modality',
   /aria-modal="false"/.test(markup) && /aria-haspopup="dialog"/.test(markup),
