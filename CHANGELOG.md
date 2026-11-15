@@ -15,6 +15,21 @@ precondition of publishing, not a courtesy.
   the packed tarball, outside the repository: the last same-author gap in the verification suite (12
   checks, its own step in the `build` and `cross-platform` jobs).
 
+### Fixed
+
+- **`Tabs` no longer renders an empty focusable tabpanel for an item with no `content`.** A tab used
+  purely as a switcher (the trading example passes `content: null`) emitted `role="tabpanel"` and
+  `aria-controls` unconditionally, putting an empty focus stop in the tab order; axe does not flag it
+  (#98). A content-less tab now renders no panel and no `aria-controls`, and a regression check
+  covers both the switcher and the content-bearing case (70 library checks).
+
+### Changed
+
+- **`@trade/tokens` publishes compiled ESM, CommonJS and declarations** alongside `tokens.ts`.
+  The package entry used to be raw TypeScript only, which worked for bundler consumers and broke
+  `require()` and every non-bundler resolver (#97). The consumer contract now loads the package in
+  both module systems (17 checks).
+
 ## [0.1.0] — unreleased
 
 The first release. Not yet published to the registry.
@@ -28,7 +43,7 @@ The first release. Not yet published to the registry.
   dark and high-contrast themes, and density scales (`1 / 0.75 / 0.625`).
 - **Logical-properties CSS**: direction is declared with the `dir` attribute and layout follows it, so
   RTL is a document attribute rather than a second stylesheet.
-- **A verification suite**: 69 library checks, 142 CSS checks, 90 browser checks across Chromium,
+- **A verification suite**: 70 library checks, 142 CSS checks, 90 browser checks across Chromium,
   Firefox and WebKit × desktop and mobile, a packaging contract, a consumer contract, a licence
   contract, 69/69 contrast pairs, a perf-retry policy, and a size gate that measures consumer cost.
 

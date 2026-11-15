@@ -14,8 +14,10 @@ violates it.
 
 ## The three tiers
 
-The build (`packages/tokens/build-tokens.mjs`) compiles `tokens.json` into two artifacts —
-`dist/tokens.css` and `dist/tokens.ts` — and its banner names the pipeline:
+The build (`packages/tokens/build-tokens.mjs`) compiles `tokens.json` into five artifacts —
+`dist/tokens.ts` (the readable source form), `dist/tokens.css`, and the compiled ESM, CommonJS and
+declaration entries — and its banner names
+the pipeline:
 
 ```
 primitive -> theme role -> component

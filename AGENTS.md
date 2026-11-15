@@ -60,7 +60,7 @@ the router says you need them.
 
 ```
 packages/tokens/tokens.json        the ONLY place raw values live (3 tiers; see header comment)
-packages/tokens/build-tokens.mjs   compiles tokens → dist/tokens.css + tokens.ts; fails on drift
+packages/tokens/build-tokens.mjs   compiles tokens → dist/tokens.css + ESM/CJS + d.ts; fails on drift
 packages/ui/src/components/        one file per component; forwardRef; cx(); ...rest spread
 packages/ui/styles/                one hand-written CSS file per area; auto-discovered by build.mjs
 packages/ui/build.mjs              esbuild ESM+CJS, tsc .d.ts, concatenates tokens.css + styles

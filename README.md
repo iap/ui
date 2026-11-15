@@ -13,7 +13,7 @@ cd ui
 npm install
 npm run build          # tokens → CSS + TS, then the library (ESM, CJS, d.ts, CSS)
 npm run example:build     # bundles the component example to apps/example/dist
-npm run verify         # 69 checks: CSS health, SSR markup, DOM interactions
+npm run verify         # 70 checks: CSS health, SSR markup, DOM interactions
 npm run verify:example    # 10 checks: boots the built example in a DOM and drives it
 npm run example-trading:build  # bundles the trading workspace example
 npm run verify:example-trading  # 32 checks: virtualization, live feed + P&L, ARIA, ticket guard, axe, 2 viewports
@@ -29,7 +29,7 @@ Open the examples (double-click — plain static files, no server needed):
 ```
 ui/
 ├─ packages/
-│  ├─ tokens/            @trade/tokens — tokens.json → tokens.css + tokens.ts (no deps)
+│  ├─ tokens/            @trade/tokens — tokens.json → tokens.css + ESM/CJS + types (no deps)
 │  └─ ui/                @trade/ui     — components, styles, build
 │     ├─ src/components/ Button, Input, Select, Field, SelectionControls,
 │     │                  DataTable, Tabs, Menu, Popover, Tooltip, Dialog, Feedback, ThemeProvider, Stack
@@ -133,7 +133,7 @@ After any change: `npm run build && npm run example:build && npm run verify && n
 ```powershell
 npm run check:contract  # 16 checks: zero deps, peer-only React, exports map, artifacts, one version
 npm run check:pack      # 11 checks: the real tarballs — entry points resolve, terms ship, nothing leaks
-npm run verify:consumer  # 16 checks: the real tarballs, installed into a project outside the repo
+npm run verify:consumer  # 17 checks: the real tarballs, installed into a project outside the repo
 npm run verify:consumer:trading  # 12 checks: the trading example rebuilt from the packed tarball
 npm run check:contrast  # 69 colour pairs across 3 themes must meet the contrast contract
 npm run check:style     # 142 checks: the CSS authoring contract (tokens-only, logical, motionless, guarded :hover, no dead prefix exceptions)
@@ -144,7 +144,7 @@ npm run check:docs      # links resolve + documented check counts agree with the
 npm run check:support   # 3 checks: the browser floor is derived from what the stylesheets use
 npm run check:perf-policy  # 82 checks: the perf-retry rules, the gated verdicts, the pinned knobs
 npm run size            # 20 checks: consumer cost vs the declared sizes, and the docs that quote them
-npm run verify          # 69 checks: CSS health, SSR markup, DOM interactions
+npm run verify          # 70 checks: CSS health, SSR markup, DOM interactions
 npm run verify:example  # 10 checks: boots the real example bundle in a DOM
 npm run harness:build   # required before verify:browser (harness/dist is gitignored)
 npm run verify:browser  # 90 checks: Chromium + Firefox + WebKit × desktop + mobile,
