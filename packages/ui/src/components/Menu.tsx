@@ -122,6 +122,10 @@ function MenuWithRef(
       items[items.length - 1]?.focus();
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      // contain the event: a Menu nested in a Dialog must close alone, and the
+      // Dialog's document-level listener must not see this Escape
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
       onClose();
     } else if (e.key === 'Tab') {
       // let focus leave naturally; the menu just stops being open

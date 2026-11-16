@@ -13,7 +13,7 @@ cd ui
 npm install
 npm run build          # tokens → CSS + TS, then the library (ESM, CJS, d.ts, CSS)
 npm run example:build     # bundles the component example to apps/example/dist
-npm run verify         # 70 checks: CSS health, SSR markup, DOM interactions
+npm run verify         # 73 checks: CSS health, SSR markup, DOM interactions
 npm run verify:example    # 10 checks: boots the built example in a DOM and drives it
 npm run example-trading:build  # bundles the trading workspace example
 npm run verify:example-trading  # 32 checks: virtualization, live feed + P&L, ARIA, ticket guard, axe, 2 viewports
@@ -144,7 +144,7 @@ npm run check:docs      # links resolve + documented check counts agree with the
 npm run check:support   # 3 checks: the browser floor is derived from what the stylesheets use
 npm run check:perf-policy  # 82 checks: the perf-retry rules, the gated verdicts, the pinned knobs
 npm run size            # 20 checks: consumer cost vs the declared sizes, and the docs that quote them
-npm run verify          # 70 checks: CSS health, SSR markup, DOM interactions
+npm run verify          # 73 checks: CSS health, SSR markup, DOM interactions
 npm run verify:example  # 10 checks: boots the real example bundle in a DOM
 npm run harness:build   # required before verify:browser (harness/dist is gitignored)
 npm run verify:browser  # 90 checks: Chromium + Firefox + WebKit × desktop + mobile,

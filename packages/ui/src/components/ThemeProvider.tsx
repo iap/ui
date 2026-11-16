@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cx } from '../internal/cx';
 
@@ -18,6 +18,7 @@ export interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export interface ThemeProviderProps {
+  /** Initial theme. Changing it later re-applies the new value. */
   theme?: ThemeName;
   children?: ReactNode;
   className?: string;
@@ -57,6 +58,17 @@ function getSystemTheme(): ResolvedTheme {
 export function ThemeProvider({ theme: initial = 'system', children, className }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<ThemeName>(initial);
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme);
+  const lastProp = useRef(initial);
+
+  // Keep the prop and the internal state in sync when the consumer changes the
+  // prop, while still allowing setTheme() to drive the value while the prop is
+  // unchanged. Without this, `theme` was initial-only despite its name.
+  useEffect(() => {
+    if (initial !== lastProp.current) {
+      lastProp.current = initial;
+      setThemeState(initial);
+    }
+  }, [initial]);
 
   useEffect(() => {
     setThemeAttribute(theme);

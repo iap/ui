@@ -72,10 +72,15 @@ export function Dialog({ open, onClose, title, children, footer, className, clos
     if (nodes.length === 0) return;
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
+    const active = document.activeElement;
+    // On open, focus sits on the dialog container itself (tabIndex -1). It is neither
+    // first nor last, so without this branch a Shift+Tab leaves the modal immediately.
+    // The same applies if focus was moved outside the dialog by a click on inert content.
+    const outside = !active || active === ref.current || !ref.current.contains(active);
+    if (e.shiftKey && (outside || active === first)) {
       e.preventDefault();
       last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
+    } else if (!e.shiftKey && (outside || active === last)) {
       e.preventDefault();
       first.focus();
     }

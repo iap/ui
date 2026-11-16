@@ -412,6 +412,23 @@ check(
 );
 
 // ── selection controls + feedback (previously untested) ──
+// The theme prop is not initial-only: changing it re-applies the new theme.
+const propThemeHost = document.createElement('div');
+document.body.appendChild(propThemeHost);
+const propThemeRoot = createRoot(propThemeHost);
+const PropTheme = ({ theme }) => h(ui.ThemeProvider, { theme }, h('span', null, 'theme probe'));
+await React.act(async () => propThemeRoot.render(h(PropTheme, { theme: 'light' })));
+const propThemeInitial = document.documentElement.getAttribute('data-theme');
+await React.act(async () => propThemeRoot.render(h(PropTheme, { theme: 'dark' })));
+const propThemeChanged = document.documentElement.getAttribute('data-theme');
+check(
+  'changing the ThemeProvider theme prop applies the new theme',
+  propThemeInitial === 'light' && propThemeChanged === 'dark',
+  `initial=${JSON.stringify(propThemeInitial)}, after prop change=${JSON.stringify(propThemeChanged)} (expected "dark")`
+);
+await React.act(async () => propThemeRoot.unmount());
+document.documentElement.removeAttribute('data-theme');
+
 const miscHost = document.createElement('div');
 document.body.appendChild(miscHost);
 let checkboxChanges = 0;
@@ -481,6 +498,18 @@ check(
   document.activeElement === lastBtn,
   `activeElement=${document.activeElement?.textContent?.trim()} (expected "${lastBtn.textContent.trim()}")`
 );
+await React.act(async () => {
+  // On open, Dialog focuses the container itself (tabIndex -1). That is the state a
+  // keyboard user is in immediately after the modal appears, and the trap used to
+  // ignore it, letting Shift+Tab leave the dialog.
+  dlg.focus();
+  dlg.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
+});
+check(
+  'Shift+Tab from the initially focused dialog container wraps to the last control',
+  document.activeElement === lastBtn,
+  `activeElement=${document.activeElement?.textContent?.trim()} (expected "${lastBtn.textContent.trim()}")`
+);
 await React.act(async () => keydown(document, 'Escape'));
 
 // ── menu: open, ARIA, keyboard navigation, disabled skipping, escape + outside close ──
@@ -540,6 +569,30 @@ check(
 );
 
 // ── popover: open, honest ARIA, escape + outside close, focus restore ──
+// A menu inside a modal must close alone; the Dialog's document-level Escape listener
+// used to see the same event and close the dialog underneath it.
+const nestedHost = document.createElement('div');
+document.body.appendChild(nestedHost);
+const nestedRoot = createRoot(nestedHost);
+let nestedMenuClosed = 0;
+let nestedDialogClosed = 0;
+await React.act(async () => nestedRoot.render(
+  h(ui.Dialog, { open: true, onClose: () => { nestedDialogClosed += 1; }, title: 'Ticket' },
+    h(ui.Menu, { open: true, onClose: () => { nestedMenuClosed += 1; }, label: 'Actions' },
+      h(ui.MenuItem, { id: 'nested-menu-item' }, 'Reload')))
+));
+const nestedItem = document.body.querySelector('#nested-menu-item');
+await React.act(async () => {
+  nestedItem.focus();
+  keydown(nestedItem, 'Escape');
+});
+check(
+  'Escape in a menu nested in a dialog closes only the menu',
+  nestedMenuClosed === 1 && nestedDialogClosed === 0,
+  `menuClosed=${nestedMenuClosed} (expected 1), dialogClosed=${nestedDialogClosed} (expected 0)`
+);
+await React.act(async () => nestedRoot.unmount());
+
 const popTrigger = container.querySelector('#popover-trigger');
 await React.act(async () => {
   popTrigger.focus();
