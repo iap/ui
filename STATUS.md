@@ -32,7 +32,7 @@ component change.
 | Measured | Value |
 |---|---|
 | Runtime dependencies | **0** (React/React DOM are peers) |
-| ESM bundle (as a consumer ships it) | **6.18 kB** min+gzip (budget 7 kB) |
+| ESM bundle (as a consumer ships it) | **6.25 kB** min+gzip (budget 7 kB) |
 | Single-component import (`Button`) | **622 B** min+gzip (budget 1.5 kB) |
 | Stylesheet | **3.76 kB** min+gzip (budget 8 kB) |
 | Theme switch cost | **0 React renders** |

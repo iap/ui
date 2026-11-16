@@ -52,7 +52,7 @@ export const EXPECTED_COUNTS = {
 export const EXPECTED_SIZES = {
   esmFull: {
     entry: '@trade/ui ESM, full surface (consumer cost, min+gzip)',
-    bytes: 6185,
+    bytes: 6245,
     budget: 7000,
     budgetLabel: '7 kB',
     docs: { 'docs/verification.md': 'ESM, full surface', 'STATUS.md': 'ESM bundle (as a consumer ships it)' }
@@ -66,7 +66,7 @@ export const EXPECTED_SIZES = {
   },
   cjsFull: {
     entry: '@trade/ui CJS, full surface (consumer cost, min+gzip)',
-    bytes: 6656,
+    bytes: 6723,
     budget: 7500,
     budgetLabel: '7.5 kB',
     docs: { 'docs/verification.md': 'CJS, full surface' }
