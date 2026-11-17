@@ -107,12 +107,17 @@ const html = `<!DOCTYPE html>
         // blocking forever — the suite's own audit timeout then surfaces it.
         var waited = 0;
         var MAX_WAIT_MS = 30000;
+        // Settle after the readiness signal before benchmarking. The readiness poll
+        // fixes the pre-mount race; keeping the original 700ms settle here (anchored
+        // after mount, not after load) lets Firefox's rAF cadence resume before the
+        // static benchmark starts.
+        var POST_READY_SETTLE_MS = 700;
         (function waitForApp() {
           if (window.__appReady === true || waited >= MAX_WAIT_MS) {
             if (waited >= MAX_WAIT_MS && window.__appReady !== true) {
               push('[harness] WARNING: app never signalled __appReady within ' + MAX_WAIT_MS + 'ms — auditing anyway');
             }
-            run();
+            setTimeout(run, POST_READY_SETTLE_MS);
             return;
           }
           waited += 50;
