@@ -138,7 +138,7 @@ npm run verify:consumer:trading  # 12 checks: the trading example rebuilt from t
 npm run check:contrast  # 69 colour pairs across 3 themes must meet the contrast contract
 npm run check:style     # 142 checks: the CSS authoring contract (tokens-only, logical, motionless, guarded :hover, no dead prefix exceptions)
 npm run check:types     # tsc --noEmit over @trade/ui — strict types are a gate, not a suggestion
-npm test                # 17 unit tests for the pure modules (node:test; no browser, no deps)
+npm test                # 18 unit tests for the pure modules (node:test; no browser, no deps)
 npm run check:license   # licence headers + manifests agree (MIT OR Apache-2.0)
 npm run check:docs      # links resolve + documented check counts agree with the suites themselves
 npm run check:support   # 3 checks: the browser floor is derived from what the stylesheets use
