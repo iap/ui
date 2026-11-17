@@ -135,8 +135,11 @@ Individual: `npm run check:contract` · `check:contrast` · `verify` · `verify:
    regression rather than a broken command. **Fixed 2026-09-26** by invoking npm through
    `process.execPath` + `npm_execpath` (npm's own CLI entry point, exported by `npm run`), with
    each package now asserting a real manifest so a broken command says so. The wider gap is
-   still open: nothing gates a script for *runnability on every platform* — CI runs Linux and
-   macOS only, so a win32-only break reaches a contributor unannounced. `baselines/win32/` has
+   narrower now but not closed: nothing gates *every* script for *runnability on every platform*.
+   The `cross-platform` CI matrix runs the platform-sensitive gates — contract, pack, both consumer
+   tarballs, style, types, unit tests, licence, docs, support, perf-policy and size — on
+   `windows-latest`/Node 22.22.2 and `ubuntu-latest`/Node 24.15.0 (`.github/workflows/ci.yml`).
+   Browser suites stay in their own environment-specific jobs, and `baselines/win32/` still has
    the same shape (issue 6).
 
 ## Working practice, 2026-09-26
