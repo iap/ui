@@ -9,18 +9,18 @@ for the APIs, [verification.md](verification.md) for the gates.
 
 Per-component, as implemented (and asserted by `scripts/verify.mjs`):
 
-| Component | Keys | Behaviour |
-|---|---|---|
-| **Tabs** | `→` / `←` | move selection **and** focus, wrap around, skip disabled (roving tabindex) |
-| | `Home` / `End` | jump to first / last tab |
-| | `Tab` | one stop on the tablist, then into the panel (`tabIndex={0}`) |
-| **Dialog** | `Escape` | closes (document-level listener) |
-| | `Tab` / `Shift+Tab` | trapped: last→first and first→last wrap, via the `FOCUSABLE` selector |
-| **DataTable** | `Tab` | scroll container is a tab stop; rows get tab stops with `focusableRows` |
-| **Checkbox/Radio/Switch** | native | Space toggles; arrow keys across radio groups; Switch is `role="switch"` |
-| **Select** | native | fully native `<select>` keyboard support, by design (ADR-002) |
-| | `listbox` variant | combobox pattern: arrows / `Home` / `End` with disabled skipping, typeahead,
-`Enter`/`Space` commit, `Escape` closes (without escaping a parent Dialog/Popover), `Tab` closes |
+| Component                                                                                        | Keys                | Behaviour                                                                    |
+| ------------------------------------------------------------------------------------------------ | ------------------- | ---------------------------------------------------------------------------- |
+| **Tabs**                                                                                         | `→` / `←`           | move selection **and** focus, wrap around, skip disabled (roving tabindex)   |
+|                                                                                                  | `Home` / `End`      | jump to first / last tab                                                     |
+|                                                                                                  | `Tab`               | one stop on the tablist, then into the panel (`tabIndex={0}`)                |
+| **Dialog**                                                                                       | `Escape`            | closes (document-level listener)                                             |
+|                                                                                                  | `Tab` / `Shift+Tab` | trapped: last→first and first→last wrap, via the `FOCUSABLE` selector        |
+| **DataTable**                                                                                    | `Tab`               | scroll container is a tab stop; rows get tab stops with `focusableRows`      |
+| **Checkbox/Radio/Switch**                                                                        | native              | Space toggles; arrow keys across radio groups; Switch is `role="switch"`     |
+| **Select**                                                                                       | native              | fully native `<select>` keyboard support, by design (ADR-002)                |
+|                                                                                                  | `listbox` variant   | combobox pattern: arrows / `Home` / `End` with disabled skipping, typeahead, |
+| `Enter`/`Space` commit, `Escape` closes (without escaping a parent Dialog/Popover), `Tab` closes |
 
 Deliberate gap, documented: DataTable ships **no built-in arrow-key row navigation** — rows are
 tab stops, nothing more. Phase 2 work.
@@ -41,7 +41,7 @@ tab stops, nothing more. Phase 2 work.
 The rule: **ARIA reflects the data, not the DOM.**
 
 - `DataTable` renders `role="grid"` with `aria-rowcount={(rowCount ?? rows.length) + 1}` — the
-  **+1 is the header row**, and `rowCount` is the *full dataset* size, not the window. A
+  **+1 is the header row**, and `rowCount` is the _full dataset_ size, not the window. A
   virtualized 200,000-row dataset with 60 rendered rows reports `aria-rowcount="200001"`, asserted
   verbatim by both `verify.mjs` (SSR, 5,000-row scale test) and `browser-suite.mjs` (live). Rows
   carry explicit `aria-rowindex` (header = 1, data rows = `rowOffset + i + 2`); cells are
@@ -65,7 +65,7 @@ in SSR markup.
 
 1. **axe-core, zero violations, both themes, every engine × viewport** — the browser suite runs
    axe in light (harness self-audit) and dark (`window.axe.run` after `__setTheme('dark')`) in
-   chromium, firefox and webkit at desktop *and* mobile sizes. Any violation > 0 fails the gate.
+   chromium, firefox and webkit at desktop _and_ mobile sizes. Any violation > 0 fails the gate.
 2. **DOM interaction checks** — `scripts/verify.mjs` phase B asserts the keyboard maps above
    actually work (roving tabindex, Home/End, both focus-trap wrap directions, Escape).
 3. **SSR markup checks** — ARIA grid semantics, honest row counts, direction glyphs, no inline

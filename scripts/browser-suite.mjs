@@ -53,7 +53,11 @@ const PORT = 4174;
 const SETTLE_MS = 1500; // let the page, fonts and first paints go quiet before measuring
 const MAX_ATTEMPTS = 3;
 const RETRY_BACKOFF_MS = 4000;
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+const TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8'
+};
 
 // Absolute fps is NOT gated: headless engines drive requestAnimationFrame at engine-specific
 // cadences (Firefox has measured the same fps ticking and idle). Gated instead: steady-state
@@ -83,7 +87,15 @@ const hostOverloaded = () => loadSignals.some(Boolean);
 const policyContext = (engine) => perfContext(process.platform, engine.name);
 
 const ENGINES = [
-  { name: 'chromium', launcher: chromium, args: ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'] },
+  {
+    name: 'chromium',
+    launcher: chromium,
+    args: [
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-backgrounding-occluded-windows'
+    ]
+  },
   { name: 'firefox', launcher: firefox, args: [] },
   { name: 'webkit', launcher: webkit, args: [] }
 ];
@@ -113,16 +125,25 @@ if (!existsSync(resolve(dist, 'index.html')) || !existsSync(resolve(dist, 'perf.
 
 const server = createServer((req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (url === '/favicon.ico') { res.writeHead(204); res.end(); return; }
+  if (url === '/favicon.ico') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
   if (req.method === 'POST' && url === '/results') {
     req.resume();
-    req.on('end', () => { res.writeHead(204); res.end(); });
+    req.on('end', () => {
+      res.writeHead(204);
+      res.end();
+    });
     return;
   }
   const rel = url === '/' ? 'index.html' : url.replace(/^\/+/, '');
   const file = join(dist, normalize(rel));
   if (!file.startsWith(dist) || !existsSync(file) || !statSync(file).isFile()) {
-    res.writeHead(404); res.end('not found'); return;
+    res.writeHead(404);
+    res.end('not found');
+    return;
   }
   res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
   res.end(readFileSync(file));
@@ -166,13 +187,19 @@ function compareShot(platform, id, theme) {
   const baseline = PNG.sync.read(readFileSync(baselinePath));
   const current = PNG.sync.read(readFileSync(currentPath));
   if (baseline.width !== current.width || baseline.height !== current.height) {
-    return { sizeMismatch: true, baseline: `${baseline.width}x${baseline.height}`, current: `${current.width}x${current.height}` };
+    return {
+      sizeMismatch: true,
+      baseline: `${baseline.width}x${baseline.height}`,
+      current: `${current.width}x${current.height}`
+    };
   }
   const diff = new PNG({ width: current.width, height: current.height });
   const manifest = loadBaselineManifest();
   const platformThreshold = manifest?.platforms?.[platform]?.pixelmatchThreshold ?? 0.1;
   const platformMaxRatio = manifest?.platforms?.[platform]?.maxVisualDiffRatio ?? 0.003;
-  const diffPixels = pixelmatch(current.data, baseline.data, diff.data, current.width, current.height, { threshold: platformThreshold });
+  const diffPixels = pixelmatch(current.data, baseline.data, diff.data, current.width, current.height, {
+    threshold: platformThreshold
+  });
   const total = current.width * current.height;
   return { diffPixels, total, ratio: diffPixels / total, maxRatio: platformMaxRatio };
 }
@@ -196,14 +223,19 @@ function writeBaselines(id) {
 }
 
 /** One measurement attempt for a single engine × viewport. */
-async function attempt(engine, vp, id) {  const browser = await engine.launcher.launch(engine.args.length ? { args: engine.args } : {});
+async function attempt(engine, vp, id) {
+  const browser = await engine.launcher.launch(engine.args.length ? { args: engine.args } : {});
   try {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
     const consoleErrors = [];
     const badResponses = [];
-    page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+    page.on('console', (m) => {
+      if (m.type() === 'error') consoleErrors.push(m.text());
+    });
     page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
-    page.on('response', (r) => { if (r.status() >= 400) badResponses.push(`${r.status()} ${r.url()}`); });
+    page.on('response', (r) => {
+      if (r.status() >= 400) badResponses.push(`${r.status()} ${r.url()}`);
+    });
 
     await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'load' });
     await page.bringToFront();
@@ -215,7 +247,10 @@ async function attempt(engine, vp, id) {  const browser = await engine.launcher.
 
     // Parse each line by its OWN prefix. The static benchmark prints before the ticking one, so an
     // unanchored /p95=/ would silently read the static value and gate on the wrong number.
-    const first = (re) => { const m = text.match(re); return m ? Number(m[1]) : NaN; };
+    const first = (re) => {
+      const m = text.match(re);
+      return m ? Number(m[1]) : NaN;
+    };
     const fps = first(/\[perf\] frames=\d+ elapsed=\d+ms fps=([\d.]+)/);
     const steadyFrames = first(/\[perf\] frames=(\d+) elapsed=/);
     const p95 = first(/\[perf\] frame delta p50=[\d.]+ms p95=([\d.]+)ms/);
@@ -255,7 +290,10 @@ async function attempt(engine, vp, id) {  const browser = await engine.launcher.
         host.innerHTML = `<div dir="${innerDir}"><span class="ui-tooltip-anchor"><span class="ui-tooltip">tip text</span></span></div>`;
         const anchor = host.querySelector('.ui-tooltip-anchor').getBoundingClientRect();
         const tip = host.querySelector('.ui-tooltip').getBoundingClientRect();
-        return { tipWidth: round(tip.width), offBy: round(tip.left + tip.width / 2 - (anchor.left + anchor.width / 2)) };
+        return {
+          tipWidth: round(tip.width),
+          offBy: round(tip.left + tip.width / 2 - (anchor.left + anchor.width / 2))
+        };
       };
       const out = { ltr: measure('ltr', 'ltr'), rtl: measure('rtl', 'rtl'), island: measure('rtl', 'ltr') };
       host.remove();
@@ -272,7 +310,12 @@ async function attempt(engine, vp, id) {  const browser = await engine.launcher.
       const wr = wrap.getBoundingClientRect();
       const tr = th.getBoundingClientRect();
       const offset = tr.top - wr.top;
-      return { ok: wrap.scrollTop > 0 && Math.abs(offset) < 8, scrollTop: Math.round(wrap.scrollTop), offset: Math.round(offset), reason: 'measured' };
+      return {
+        ok: wrap.scrollTop > 0 && Math.abs(offset) < 8,
+        scrollTop: Math.round(wrap.scrollTop),
+        offset: Math.round(offset),
+        reason: 'measured'
+      };
     });
 
     await page.evaluate(() => window.__setTheme('dark'));
@@ -303,8 +346,26 @@ async function attempt(engine, vp, id) {  const browser = await engine.launcher.
     }
 
     return {
-      fps, p95, over33, steadyFrames, droppedRatio, overflow, structureRows, rowcount, themeOk,
-      lightAxe, staticFps, staticP95, darkViolations, consoleErrors, badResponses, axeErrored, lines, sticky, tooltipGeometry, visual
+      fps,
+      p95,
+      over33,
+      steadyFrames,
+      droppedRatio,
+      overflow,
+      structureRows,
+      rowcount,
+      themeOk,
+      lightAxe,
+      staticFps,
+      staticP95,
+      darkViolations,
+      consoleErrors,
+      badResponses,
+      axeErrored,
+      lines,
+      sticky,
+      tooltipGeometry,
+      visual
     };
   } finally {
     await browser.close();
@@ -348,29 +409,48 @@ for (const engine of ENGINES) {
       // Chromium's STATIC p95 read 50 ms on that run, which no real hardware produces. So on macOS
       // only WebKit's perf gates; other engines' perf is informational there.
       const perfInformational = !perfGated(process.platform, engine.name);
-      const perfNote = process.platform === 'darwin'
-        ? 'shared macOS runner, not real hardware'
-        : 'WebKit port, not macOS Safari; gated by the browser-macos CI job';
+      const perfNote =
+        process.platform === 'darwin'
+          ? 'shared macOS runner, not real hardware'
+          : 'WebKit port, not macOS Safari; gated by the browser-macos CI job';
       const add = (name, pass, detail) => entry.checks.push({ name, pass, detail });
       add('no horizontal overflow', Math.abs(m.overflow) <= T.maxOverflowPx, `overflow=${m.overflow}px`);
       add('theme switch works', m.themeOk, m.lines.find((l) => l.startsWith('[theme]')) ?? 'n/a');
-      add('ARIA row count preserved', m.rowcount === 200001 && m.structureRows === 60, `rows=${m.structureRows}, aria-rowcount=${m.rowcount}`);
+      add(
+        'ARIA row count preserved',
+        m.rowcount === 200001 && m.structureRows === 60,
+        `rows=${m.structureRows}, aria-rowcount=${m.rowcount}`
+      );
       add('axe violations (light theme)', m.lightAxe <= T.maxAxeViolations, `${m.lightAxe}`);
-      add('axe violations (dark theme)', m.darkViolations.length <= T.maxAxeViolations, `${m.darkViolations.length} ${m.darkViolations.map((v) => v.id).join(',')}`);
-      add('no console errors / failed responses', m.consoleErrors.length <= T.maxConsoleErrors && m.badResponses.length === 0, `${m.consoleErrors.length} console${m.badResponses.length ? ', bad: ' + m.badResponses.join(', ') : ''}`);
+      add(
+        'axe violations (dark theme)',
+        m.darkViolations.length <= T.maxAxeViolations,
+        `${m.darkViolations.length} ${m.darkViolations.map((v) => v.id).join(',')}`
+      );
+      add(
+        'no console errors / failed responses',
+        m.consoleErrors.length <= T.maxConsoleErrors && m.badResponses.length === 0,
+        `${m.consoleErrors.length} console${m.badResponses.length ? ', bad: ' + m.badResponses.join(', ') : ''}`
+      );
       add('axe ran without throwing', !m.axeErrored, m.axeErrored ? 'axe threw' : 'clean');
-      add('steady-state frame cadence (p95)' + (perfInformational ? ' [informational on this host]' : ''),
+      add(
+        'steady-state frame cadence (p95)' + (perfInformational ? ' [informational on this host]' : ''),
         tickingWithinBudget(m, policyContext(engine)),
         `p95=${m.p95}ms (max ${T.maxP95FrameMs}ms) over ${m.steadyFrames} frames` +
-          (perfInformational ? ` — ${perfNote}` : ''));
+          (perfInformational ? ` — ${perfNote}` : '')
+      );
 
       entry.droppedRatioGated = !perfInformational;
-      add('dropped frames (>33ms) ratio' + (perfInformational ? ' [informational on this host]' : ''),
+      add(
+        'dropped frames (>33ms) ratio' + (perfInformational ? ' [informational on this host]' : ''),
         perfInformational ? true : m.droppedRatio <= T.maxDroppedFrameRatio,
-        `${m.over33}/${m.steadyFrames} = ${(m.droppedRatio * 100).toFixed(1)}% (max ${T.maxDroppedFrameRatio * 100}%)`);
-      add('static render cadence (p95)' + (perfInformational ? ' [informational on this host]' : ''),
+        `${m.over33}/${m.steadyFrames} = ${(m.droppedRatio * 100).toFixed(1)}% (max ${T.maxDroppedFrameRatio * 100}%)`
+      );
+      add(
+        'static render cadence (p95)' + (perfInformational ? ' [informational on this host]' : ''),
         staticWithinBudget(m, policyContext(engine)),
-        `static p95=${m.staticP95}ms, static fps=${m.staticFps}`);
+        `static p95=${m.staticP95}ms, static fps=${m.staticFps}`
+      );
       // The probe must have rendered a real bubble in every case, or a zero-width tooltip would
       // satisfy the centring assertion vacuously.
       const tipOk = (g) => g.tipWidth > 10 && Math.abs(g.offBy) < 1;
@@ -379,12 +459,22 @@ for (const engine of ENGINES) {
         tipOk(m.tooltipGeometry.ltr) && tipOk(m.tooltipGeometry.rtl) && tipOk(m.tooltipGeometry.island),
         `ltr off=${m.tooltipGeometry.ltr.offBy} (w=${m.tooltipGeometry.ltr.tipWidth}), rtl off=${m.tooltipGeometry.rtl.offBy} (w=${m.tooltipGeometry.rtl.tipWidth}), island off=${m.tooltipGeometry.island.offBy} (w=${m.tooltipGeometry.island.tipWidth})`
       );
-      add('sticky header stays pinned when the table scrolls', m.sticky?.ok === true, m.sticky?.ok ? `scrolled ${m.sticky.scrollTop}px, header offset ${m.sticky.offset}px` : `NOT PINNED — ${m.sticky?.reason ?? 'no reading'}`);
+      add(
+        'sticky header stays pinned when the table scrolls',
+        m.sticky?.ok === true,
+        m.sticky?.ok
+          ? `scrolled ${m.sticky.scrollTop}px, header offset ${m.sticky.offset}px`
+          : `NOT PINNED — ${m.sticky?.reason ?? 'no reading'}`
+      );
 
       // Visual regression — gates only where the baselines were generated (same platform);
       // elsewhere it is informational, like the perf gates on a mismatched host/engine.
       if (m.visual?.updated) {
-        add('visual regression (baselines rewritten)', true, 'update mode: baselines/ and manifest rewritten — commit them');
+        add(
+          'visual regression (baselines rewritten)',
+          true,
+          'update mode: baselines/ and manifest rewritten — commit them'
+        );
       } else if (m.visual) {
         // Gate only when a committed baseline set exists for this host. When none exists
         // the check is informational (passing) — the host's own directory is absent AND
@@ -397,16 +487,27 @@ for (const engine of ENGINES) {
         for (const theme of ['dark', 'light']) {
           const v = m.visual[theme];
           if (v.missing) {
-            add('visual regression (' + theme + ' theme)' + vNote, !vGate, vGate ? 'NO BASELINE — run: npm run baselines:update' : 'no baseline for this platform');
+            add(
+              'visual regression (' + theme + ' theme)' + vNote,
+              !vGate,
+              vGate ? 'NO BASELINE — run: npm run baselines:update' : 'no baseline for this platform'
+            );
           } else if (v.sizeMismatch) {
-            add('visual regression (' + theme + ' theme)' + vNote, !vGate, `viewport size changed: baseline ${v.baseline}, got ${v.current}`);
+            add(
+              'visual regression (' + theme + ' theme)' + vNote,
+              !vGate,
+              `viewport size changed: baseline ${v.baseline}, got ${v.current}`
+            );
           } else {
             // On a platform with no committed baselines the comparison is informational and
             // always passes; the ratio is still reported so drift is visible.
             const ok = !vGate || v.ratio <= v.maxRatio;
-            add('visual regression (' + theme + ' theme)' + vNote, ok,
+            add(
+              'visual regression (' + theme + ' theme)' + vNote,
+              ok,
               `${v.diffPixels}/${v.total} px differ = ${(v.ratio * 100).toFixed(3)}% (max ${(v.maxRatio * 100).toFixed(1)}%)` +
-              (ok ? '' : ' — if the change is intended, regenerate: npm run baselines:update'));
+                (ok ? '' : ' — if the change is intended, regenerate: npm run baselines:update')
+            );
           }
         }
       }
@@ -418,7 +519,9 @@ for (const engine of ENGINES) {
       entry.droppedRatio = Number(m.droppedRatio.toFixed(4));
       entry.staticFps = m.staticFps;
       entry.staticP95 = m.staticP95;
-      entry.lightViolationIds = (m.lines.join('\n').match(/\[a11y\] (?:serious|moderate|minor|critical) \| ([a-z-]+)/g) || []).map((s) => s.split('| ')[1]);
+      entry.lightViolationIds = (
+        m.lines.join('\n').match(/\[a11y\] (?:serious|moderate|minor|critical) \| ([a-z-]+)/g) || []
+      ).map((s) => s.split('| ')[1]);
       entry.darkViolationIds = m.darkViolations.map((v) => v.id);
       entry.throttledOnFinalAttempt = looksThrottled(m);
       entry.stickyHeader = m.sticky ?? null;
@@ -433,7 +536,9 @@ for (const engine of ENGINES) {
     const perfSummary = m
       ? `  [perf: ticking p95=${m.p95}ms (max ${T.maxP95FrameMs}ms), dropped ${(m.droppedRatio * 100).toFixed(1)}%, static p95=${m.staticP95}ms${perfGated(process.platform, engine.name) ? '' : ', informational'}]`
       : '';
-    console.log(`${label}  ${id}  (${entry.passed}/${entry.checks.length})${entry.attempts > 1 ? `  [retried: ${entry.attempts} attempts]` : ''}${entry.throttledOnFinalAttempt ? '  [STILL THROTTLED]' : ''}${perfSummary}`);
+    console.log(
+      `${label}  ${id}  (${entry.passed}/${entry.checks.length})${entry.attempts > 1 ? `  [retried: ${entry.attempts} attempts]` : ''}${entry.throttledOnFinalAttempt ? '  [STILL THROTTLED]' : ''}${perfSummary}`
+    );
     for (const c of entry.checks.filter((x) => !x.pass)) console.log(`        - ${c.name}: ${c.detail}`);
     for (const e of entry.errors) console.log(`        ! ${e}`);
   }
@@ -449,11 +554,19 @@ if (UPDATE_BASELINES) {
     pixelmatchThreshold: 0.1,
     updatedAt: new Date().toISOString()
   };
-  writeFileSync(resolve(baselines, 'manifest.json'), JSON.stringify({
-    latestPlatform: process.platform,
-    platforms,
-    note: 'Baselines are platform-bound: baselines/<platform>/ gates visual checks on that platform only; other hosts report them as informational.'
-  }, null, 2) + '\n', 'utf8');
+  writeFileSync(
+    resolve(baselines, 'manifest.json'),
+    JSON.stringify(
+      {
+        latestPlatform: process.platform,
+        platforms,
+        note: 'Baselines are platform-bound: baselines/<platform>/ gates visual checks on that platform only; other hosts report them as informational.'
+      },
+      null,
+      2
+    ) + '\n',
+    'utf8'
+  );
   console.log(`Baselines rewritten for platform '${process.platform}' — commit baselines/ with this change.`);
 }
 
@@ -465,7 +578,8 @@ const report = {
     settleMs: SETTLE_MS,
     maxAttempts: MAX_ATTEMPTS,
     note: 'combos are retried when a reading looks OS-throttled, when a gated perf reading is only marginally over budget, or when an earlier combo showed the host is overloaded; the better attempt is kept (policy: scripts/perf-policy.mjs, checked by scripts/check-perf-policy.mjs)',
-    knownUnstable: 'webkit dropped-frame ratio on non-macOS hosts (port engine) and every engine except webkit on the shared macOS runner — reported but not gated'
+    knownUnstable:
+      'webkit dropped-frame ratio on non-macOS hosts (port engine) and every engine except webkit on the shared macOS runner — reported but not gated'
   },
   thresholds: T,
   engines: ENGINES.map((e) => e.name),
@@ -481,7 +595,9 @@ const report = {
 };
 writeFileSync(resolve(root, 'verification', 'browser-suite-report.json'), JSON.stringify(report, null, 2), 'utf8');
 
-console.log(`\nTOTAL: ${report.totals.passed}/${report.totals.checks} checks passed across ${results.length} combos (${report.totals.retried} retried)`);
+console.log(
+  `\nTOTAL: ${report.totals.passed}/${report.totals.checks} checks passed across ${results.length} combos (${report.totals.retried} retried)`
+);
 
 // The suite's own count contract: if a check was added or removed without bumping
 // CHECKS_PER_COMBO, the documented totals everywhere else are already wrong.

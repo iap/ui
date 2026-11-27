@@ -7,8 +7,24 @@
  * `harness`      is an interactive tree used by the verification DOM tests.
  */
 export function sampleScreen(ui, h) {
-  const { ThemeProvider, Stack, Button, Input, Field, Checkbox, Select, DataTable, Cell, Tabs, Dialog, Banner, Toast, ToastRegion, Tooltip, Popover } =
-    ui;
+  const {
+    ThemeProvider,
+    Stack,
+    Button,
+    Input,
+    Field,
+    Checkbox,
+    Select,
+    DataTable,
+    Cell,
+    Tabs,
+    Dialog,
+    Banner,
+    Toast,
+    ToastRegion,
+    Tooltip,
+    Popover
+  } = ui;
 
   const rows = [
     { symbol: 'AAPL', name: 'Apple Inc.', last: 187.42, chg: 1.24 },
@@ -29,8 +45,11 @@ export function sampleScreen(ui, h) {
       width: 96,
       numeric: true,
       render: (r) =>
-        h(Cell, { numeric: true, tone: r.chg >= 0 ? 'positive' : 'negative', direction: r.chg >= 0 ? 'up' : 'down' },
-          Math.abs(r.chg).toFixed(2))
+        h(
+          Cell,
+          { numeric: true, tone: r.chg >= 0 ? 'positive' : 'negative', direction: r.chg >= 0 ? 'up' : 'down' },
+          Math.abs(r.chg).toFixed(2)
+        )
     }
   ];
 
@@ -41,16 +60,13 @@ export function sampleScreen(ui, h) {
       Stack,
       { gap: 4 },
       h(Banner, { tone: 'info', title: 'Info' }, 'Market data is delayed by 15 minutes.'),
-      h(
-        Tabs,
-        {
-          items: [
-            { key: 'positions', label: 'Positions', content: h('p', null, 'Positions panel') },
-            { key: 'orders', label: 'Orders', content: h('p', null, 'Orders panel') },
-            { key: 'fills', label: 'Fills', content: h('p', null, 'Fills panel') }
-          ]
-        }
-      ),
+      h(Tabs, {
+        items: [
+          { key: 'positions', label: 'Positions', content: h('p', null, 'Positions panel') },
+          { key: 'orders', label: 'Orders', content: h('p', null, 'Orders panel') },
+          { key: 'fills', label: 'Fills', content: h('p', null, 'Fills panel') }
+        ]
+      }),
       h(DataTable, {
         columns,
         rows,
@@ -68,8 +84,21 @@ export function sampleScreen(ui, h) {
         h(Button, { variant: 'danger', disabled: true }, 'Disabled')
       ),
       h(Field, { label: 'Symbol' }, h(Input, { defaultValue: 'AAPL' })),
-      h(Field, { label: 'Limit price', error: 'Enter a price above 0.00' }, h(Input, { numeric: true, invalid: true, defaultValue: '-' })),
-      h(Field, { label: 'Time in force' }, h(Select, { options: [{ value: 'day', label: 'Day' }, { value: 'gtc', label: 'GTC' }] })),
+      h(
+        Field,
+        { label: 'Limit price', error: 'Enter a price above 0.00' },
+        h(Input, { numeric: true, invalid: true, defaultValue: '-' })
+      ),
+      h(
+        Field,
+        { label: 'Time in force' },
+        h(Select, {
+          options: [
+            { value: 'day', label: 'Day' },
+            { value: 'gtc', label: 'GTC' }
+          ]
+        })
+      ),
       h(
         Field,
         { label: 'Order type' },
@@ -146,8 +175,19 @@ export function harness(ui, h, React) {
         ]
       }),
       h(Button, { variant: 'primary', id: 'open-dialog', onClick: () => setOpen(true) }, 'Trade'),
-      h('div', { className: 'ui-menu-anchor' },
-        h(Button, { id: 'menu-trigger', 'aria-haspopup': 'menu', 'aria-expanded': menuOpen, onClick: () => setMenuOpen((v) => !v) }, 'Actions'),
+      h(
+        'div',
+        { className: 'ui-menu-anchor' },
+        h(
+          Button,
+          {
+            id: 'menu-trigger',
+            'aria-haspopup': 'menu',
+            'aria-expanded': menuOpen,
+            onClick: () => setMenuOpen((v) => !v)
+          },
+          'Actions'
+        ),
         h(
           Menu,
           { open: menuOpen, onClose: () => setMenuOpen(false), label: 'Actions' },
@@ -179,22 +219,52 @@ export function harness(ui, h, React) {
         h(
           'div',
           { className: 'ui-popover-anchor' },
-          h(Button, { id: 'dialog-popover-trigger', 'aria-haspopup': 'dialog', 'aria-expanded': dialogPopoverOpen, onClick: () => setDialogPopoverOpen((v) => !v) }, 'Ticket options'),
-          h(Popover, { open: dialogPopoverOpen, onClose: () => setDialogPopoverOpen(false), label: 'Ticket options' }, h('p', null, 'Nested popover'))
+          h(
+            Button,
+            {
+              id: 'dialog-popover-trigger',
+              'aria-haspopup': 'dialog',
+              'aria-expanded': dialogPopoverOpen,
+              onClick: () => setDialogPopoverOpen((v) => !v)
+            },
+            'Ticket options'
+          ),
+          h(
+            Popover,
+            { open: dialogPopoverOpen, onClose: () => setDialogPopoverOpen(false), label: 'Ticket options' },
+            h('p', null, 'Nested popover')
+          )
         )
       ),
       h(
         'div',
         { className: 'ui-popover-anchor' },
-        h(Button, { id: 'popover-trigger', 'aria-haspopup': 'dialog', 'aria-expanded': popoverOpen, onClick: () => setPopoverOpen((v) => !v) }, 'Filters'),
+        h(
+          Button,
+          {
+            id: 'popover-trigger',
+            'aria-haspopup': 'dialog',
+            'aria-expanded': popoverOpen,
+            onClick: () => setPopoverOpen((v) => !v)
+          },
+          'Filters'
+        ),
         h(
           Popover,
           { open: popoverOpen, onClose: () => setPopoverOpen(false), label: 'Filters' },
           h('p', null, 'Popover body')
         )
       ),
-      h(Tooltip, { label: 'Maximum order size' }, h(Button, { id: 'tooltip-trigger', 'aria-describedby': 'preset-desc' }, 'Hover me')),
-      h(Tooltip, { label: 'Composed handler test', onMouseEnter: () => {}, onFocus: () => {}, onKeyDown: () => {} }, h(Button, { id: 'composed-tooltip-trigger' }, 'Composed')),
+      h(
+        Tooltip,
+        { label: 'Maximum order size' },
+        h(Button, { id: 'tooltip-trigger', 'aria-describedby': 'preset-desc' }, 'Hover me')
+      ),
+      h(
+        Tooltip,
+        { label: 'Composed handler test', onMouseEnter: () => {}, onFocus: () => {}, onKeyDown: () => {} },
+        h(Button, { id: 'composed-tooltip-trigger' }, 'Composed')
+      ),
       h(
         'div',
         null,

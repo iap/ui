@@ -16,7 +16,14 @@ export const MenuItem = /* @__PURE__ */ forwardRef(function MenuItem(
   ref: Ref<HTMLButtonElement>
 ) {
   return (
-    <button ref={ref} type="button" role="menuitem" className={cx('ui-menuitem', className)} disabled={disabled} {...rest}>
+    <button
+      ref={ref}
+      type="button"
+      role="menuitem"
+      className={cx('ui-menuitem', className)}
+      disabled={disabled}
+      {...rest}
+    >
       {children}
     </button>
   );

@@ -34,7 +34,10 @@ const ROW = {
   'docs/verification.md': (label, budget, value) =>
     new RegExp(`^\\|\\s*${escapeRe(label)}\\s*\\|\\s*${escapeRe(budget)}\\s*\\|\\s*${escapeRe(value)}\\s*\\|`, 'm'),
   'STATUS.md': (label, budget, value) =>
-    new RegExp(`^\\|\\s*${escapeRe(label)}\\s*\\|\\s*\\*\\*${escapeRe(value)}\\*\\*\\s*min\\+gzip\\s*\\(budget\\s*${escapeRe(budget)}\\)`, 'm')
+    new RegExp(
+      `^\\|\\s*${escapeRe(label)}\\s*\\|\\s*\\*\\*${escapeRe(value)}\\*\\*\\s*min\\+gzip\\s*\\(budget\\s*${escapeRe(budget)}\\)`,
+      'm'
+    )
 };
 
 const checks = [];
@@ -55,7 +58,11 @@ try {
   // `process.execPath` is the same interpreter already running this file, so the invocation is
   // identical on every platform and stays shell-free — the argument list is fixed literals.
   const bin = join(root, 'node_modules', 'size-limit', 'bin.js');
-  const stdout = execFileSync(process.execPath, [bin, '--json'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  const stdout = execFileSync(process.execPath, [bin, '--json'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
   measured = JSON.parse(stdout);
 } catch (error) {
   try {
@@ -74,7 +81,9 @@ const entries = Object.entries(EXPECTED_SIZES);
 // otherwise be measured and then ignored — including by the error path above, which would swallow its
 // budget failure and still report a clean run.
 const missing = entries.filter(([, claim]) => !byName.has(claim.entry)).map(([key]) => key);
-const undeclared = measured.filter((entry) => !entries.some(([, claim]) => claim.entry === entry.name)).map((entry) => entry.name);
+const undeclared = measured
+  .filter((entry) => !entries.some(([, claim]) => claim.entry === entry.name))
+  .map((entry) => entry.name);
 check(
   'the measured artifacts are exactly the declared ones',
   missing.length === 0 && undeclared.length === 0,
@@ -117,7 +126,11 @@ for (const [key, claim] of entries) {
   for (const [file, label] of Object.entries(claim.docs)) {
     const doc = readFileSync(join(root, file), 'utf8');
     const ok = ROW[file](label, claim.budgetLabel, value).test(doc);
-    check(`${file} states ${key} as ${value} in its row`, ok, ok ? `"${label}"` : `no row "${label} | ${claim.budgetLabel} | ${value}"`);
+    check(
+      `${file} states ${key} as ${value} in its row`,
+      ok,
+      ok ? `"${label}"` : `no row "${label} | ${claim.budgetLabel} | ${value}"`
+    );
   }
 }
 

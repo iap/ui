@@ -52,15 +52,17 @@ import { ThemeProvider, Button, DataTable, Cell } from '@trade/ui';
 import '@trade/ui/styles.css';
 
 <ThemeProvider theme="system">
-  <Button variant="primary" density="compact">Submit order</Button>
-</ThemeProvider>
+  <Button variant="primary" density="compact">
+    Submit order
+  </Button>
+</ThemeProvider>;
 ```
 
 Theme switching without a render (the cheapest path):
 
 ```ts
 import { setThemeAttribute } from '@trade/ui';
-setThemeAttribute('dark');   // writes data-theme on <html>; zero React renders
+setThemeAttribute('dark'); // writes data-theme on <html>; zero React renders
 ```
 
 ### Installing
@@ -82,31 +84,33 @@ the built-in `GITHUB_TOKEN` works when the package grants the repository read ac
 
 ## Architecture decisions implemented
 
-| Decision | Implementation |
-|---|---|
-| Minimal dependencies | `dependencies: {}` — React/React DOM are peers only |
-| Consistency | One token vocabulary (`--ui-*`) drives every component |
-| Efficiency | Static CSS, no CSS-in-JS runtime; per-component CSS files for import-level tree-shaking |
-| Non-animated | Core has no transitions; the only `transition` declarations set `none` |
-| Light + dark | Same token names in both themes, switched by one attribute |
-| Cross-browser | Standard CSS custom properties; no `light-dark()` or `@layer` dependency in the core |
-| Trading-ready | Dense density, tabular numerals, direction glyphs, ARIA grid with honest row counts |
+| Decision             | Implementation                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| Minimal dependencies | `dependencies: {}` — React/React DOM are peers only                                     |
+| Consistency          | One token vocabulary (`--ui-*`) drives every component                                  |
+| Efficiency           | Static CSS, no CSS-in-JS runtime; per-component CSS files for import-level tree-shaking |
+| Non-animated         | Core has no transitions; the only `transition` declarations set `none`                  |
+| Light + dark         | Same token names in both themes, switched by one attribute                              |
+| Cross-browser        | Standard CSS custom properties; no `light-dark()` or `@layer` dependency in the core    |
+| Trading-ready        | Dense density, tabular numerals, direction glyphs, ARIA grid with honest row counts     |
 
 ---
 
 ## Change guide
 
-| To change… | Edit |
-|---|---|
-| Brand/semantic colours, light or dark | `packages/tokens/tokens.json` → `color` |
-| Spacing, radius, type scale, elevation | `packages/tokens/tokens.json` → `space` / `radius` / `font` / `elevation` |
-| Component density | `packages/tokens/tokens.json` → `density` (comfortable 1 / compact .75 / dense .625) |
-| Whether motion exists at all | `packages/tokens/tokens.json` → `motion.enabled` (keep `false` for v1) |
-| A component's look | `packages/ui/styles/<area>.css` |
-| A component's API/behaviour | `packages/ui/src/components/<Name>.tsx` |
-| Example content or instruments | `apps/example/src/main.jsx`, `apps/example-trading/src/main.jsx` |
-| What "correct" means | `scripts/verify.mjs`, `scripts/verify-example.mjs`, `scripts/verify-example-trading.mjs` |
-| What pixels should look like | `npm run baselines:update` rewrites `baselines/<platform>/`; the suite compares against it read-only every `verify:browser` run |
+| To change…                             | Edit                                                                                                                                                                                          |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brand/semantic colours, light or dark  | `packages/tokens/tokens.json` → `color`                                                                                                                                                       |
+| Spacing, radius, type scale, elevation | `packages/tokens/tokens.json` → `space` / `radius` / `font` / `elevation`                                                                                                                     |
+| Component density                      | `packages/tokens/tokens.json` → `density` (comfortable 1 / compact .75 / dense .625)                                                                                                          |
+| Whether motion exists at all           | `packages/tokens/tokens.json` → `motion.enabled` (keep `false` for v1)                                                                                                                        |
+| A component's look                     | `packages/ui/styles/<area>.css`                                                                                                                                                               |
+| A component's API/behaviour            | `packages/ui/src/components/<Name>.tsx`                                                                                                                                                       |
+| Example content or instruments         | `apps/example/src/main.jsx`, `apps/example-trading/src/main.jsx`                                                                                                                              |
+| What "correct" means                   | `scripts/verify.mjs`, `scripts/verify-example.mjs`, `scripts/verify-example-trading.mjs`                                                                                                      |
+| What pixels should look like           | `npm run baselines:update` rewrites `baselines/<platform>/`; the suite compares against it read-only every `verify:browser` run                                                               |
+| Source formatting                      | `.prettierrc.json` + `.prettierignore`; `npm run format` rewrites, `npm run format:check` gates in CI                                                                                         |
+| Fork PR formatting                     | add the `format:apply` label to opt in; `.github/workflows/format-pr.yml` produces a patch, `.github/workflows/format-pr-apply.yml` validates it and pushes a base-repo branch back to the PR |
 
 After any change: `npm run build && npm run example:build && npm run verify && npm run verify:example`.
 
@@ -137,8 +141,9 @@ npm run verify:consumer  # 17 checks: the real tarballs, installed into a projec
 npm run verify:consumer:trading  # 12 checks: the trading example rebuilt from the packed tarball
 npm run check:contrast  # 69 colour pairs across 3 themes must meet the contrast contract
 npm run check:style     # 142 checks: the CSS authoring contract (tokens-only, logical, motionless, guarded :hover, no dead prefix exceptions)
+npm run format:check    # Prettier contract: every source file matches .prettierrc.json
 npm run check:types     # tsc --noEmit over @trade/ui — strict types are a gate, not a suggestion
-npm test                # 18 unit tests for the pure modules (node:test; no browser, no deps)
+npm test                # 19 unit tests for the pure modules (node:test; no browser, no deps)
 npm run check:license   # licence headers + manifests agree (MIT OR Apache-2.0)
 npm run check:docs      # links resolve + documented check counts agree with the suites themselves
 npm run check:support   # 3 checks: the browser floor is derived from what the stylesheets use
@@ -183,8 +188,8 @@ numbers that move between runs is worse than no gate, so the browser suite:
   read catastrophically (the host is thrashing) - keeping the better attempt
   (`scripts/perf-policy.mjs`, checked by `npm run check:perf-policy`), and
 - gates on **p95 frame delta** and the **dropped-frame ratio**, not absolute fps (headless engines
-drive `requestAnimationFrame` at engine-specific cadences — Firefox measures the same fps ticking
-and idle).
+  drive `requestAnimationFrame` at engine-specific cadences — Firefox measures the same fps ticking
+  and idle).
 
 Visual captures are held to the same standard (ADR-005): before any screenshot the harness
 **freezes for capture** — the data feed stops, the ticking table resets to its canonical state,

@@ -100,9 +100,19 @@ const forbidIn = (doc, docName, pattern, what) => {
 // Only the browser-suite total is machine-verified here (it is the one count a suite prints);
 // the verify/check:style/check:contract counts were fixed by hand, which is exactly how they had
 // drifted — the staleTokens scan below is the backstop for the ones that did.
-expectIn(readme, 'README.md', new RegExp(`verify:browser\\s*#\\s*${compare} checks`), `the verify:browser row total (${compare} checks)`);
+expectIn(
+  readme,
+  'README.md',
+  new RegExp(`verify:browser\\s*#\\s*${compare} checks`),
+  `the verify:browser row total (${compare} checks)`
+);
 expectIn(readme, 'README.md', new RegExp(`${compare}/${compare}`), `the clean-run total (${compare}/${compare})`);
-expectIn(agents, 'AGENTS.md', new RegExp(`browser-suite\\.mjs\\s+${compare} checks`), 'the repository-map browser-suite count');
+expectIn(
+  agents,
+  'AGENTS.md',
+  new RegExp(`browser-suite\\.mjs\\s+${compare} checks`),
+  'the repository-map browser-suite count'
+);
 expectIn(agents, 'AGENTS.md', /baselines\/<platform>/, 'the baselines reviewed-exception (baselines/<platform>/)');
 
 // Stale paths and script names. The apps are examples (apps/example,
@@ -113,14 +123,33 @@ expectIn(agents, 'AGENTS.md', /baselines\/<platform>/, 'the baselines reviewed-e
 // CONTRIBUTING/STATUS. Suite-printed numbers are governed below; names and figures no suite
 // prints depend on this list staying honest.
 const staleTokens = [
-  'apps/demo', 'apps/trading', 'verify:demo', 'verify:screen', 'screen:build',
-  'npm run demo', 'build-demo', 'verify-demo', 'build-trading',
-  '39 library checks', '97 checks over', '12 checks × 6 combos = 72',
-  '4.34', '4.06 kB', '4.2 KB gzip',
+  'apps/demo',
+  'apps/trading',
+  'verify:demo',
+  'verify:screen',
+  'screen:build',
+  'npm run demo',
+  'build-demo',
+  'verify-demo',
+  'build-trading',
+  '39 library checks',
+  '97 checks over',
+  '12 checks × 6 combos = 72',
+  '4.34',
+  '4.06 kB',
+  '4.2 KB gzip',
   // Superseded size figures. They lived in four documents and drifted apart; the current values are
   // gated by scripts/check-size-claims.mjs, and these must never come back.
-  '5.89', '620 B', '6.36 kB', '3.72 kB', '7.78 kB', '5.47 kB',
-  '21 roles', '114 custom properties', '8 files, ~320', '26 checks: virtualization',
+  '5.89',
+  '620 B',
+  '6.36 kB',
+  '3.72 kB',
+  '7.78 kB',
+  '5.47 kB',
+  '21 roles',
+  '114 custom properties',
+  '8 files, ~320',
+  '26 checks: virtualization',
   '20 steps'
 ];
 for (const file of markdownFiles) {
@@ -130,7 +159,12 @@ for (const file of markdownFiles) {
     if (doc.includes(token)) stale.push(`${docName}: stale reference "${token}"`);
   }
 }
-expectIn(contributing, 'CONTRIBUTING.md', /baselines\/<platform>/, 'the baselines reviewed-exception (baselines/<platform>/)');
+expectIn(
+  contributing,
+  'CONTRIBUTING.md',
+  /baselines\/<platform>/,
+  'the baselines reviewed-exception (baselines/<platform>/)'
+);
 expectIn(readme, 'README.md', /baselines\/<platform>/, 'the baselines reviewed-exception (baselines/<platform>/)');
 
 // The perf-retry policy is a gate, so it must be described where the retry is documented and
@@ -138,7 +172,12 @@ expectIn(readme, 'README.md', /baselines\/<platform>/, 'the baselines reviewed-e
 const verification = readDoc('docs/verification.md');
 const performanceDoc = readDoc('docs/performance.md');
 const pkg = readDoc('package.json');
-expectIn(verification, 'docs/verification.md', new RegExp('browser-suite\\.mjs[^\\n]*= ' + compare), 'the browser-suite per-combo total (= ' + compare + ')');
+expectIn(
+  verification,
+  'docs/verification.md',
+  new RegExp('browser-suite\\.mjs[^\\n]*= ' + compare),
+  'the browser-suite per-combo total (= ' + compare + ')'
+);
 expectIn(verification, 'docs/verification.md', /perf-policy\.mjs/, 'the perf-policy module');
 // The consumer gate is described where the other suites are; a gate nobody documents is a gate the
 // next contributor deletes. Rule zero applies to the doc as much as to the chain.
@@ -146,7 +185,12 @@ expectIn(verification, 'docs/verification.md', /verify-consumer\.mjs/, 'the cons
 expectIn(verification, 'docs/verification.md', /verify-consumer-trading\.mjs/, 'the trading dogfood section');
 expectIn(performanceDoc, 'docs/performance.md', /perf-policy\.mjs/, 'the perf-policy module');
 expectIn(pkg, 'package.json', /"check:perf-policy":/, 'the check:perf-policy script');
-expectIn(pkg, 'package.json', /check:perf-policy && npm run check:commits/, 'check:perf-policy wired into the ci chain');
+expectIn(
+  pkg,
+  'package.json',
+  /check:perf-policy && npm run check:commits/,
+  'check:perf-policy wired into the ci chain'
+);
 const workflow = readDoc('.github/workflows/ci.yml');
 expectIn(workflow, '.github/workflows/ci.yml', /npm run check:perf-policy/, 'the perf-policy gate in the CI build job');
 // Rule zero for a workflow: the npm chain is not what CI runs. GitHub Actions runs these steps
@@ -170,13 +214,19 @@ for (const job of ['build', 'cross-platform']) {
 expectIn(workflow, '.github/workflows/ci.yml', /npm run check:support/, 'the browser-floor gate in the CI build job');
 // The new gate's own total is quoted in README; read it from the gate rather than trusting the prose.
 const policyCount = Number(
-  (execSync('node scripts/check-perf-policy.mjs', { cwd: root, encoding: 'utf8' }).match(/perf policy: (\d+)\//) ?? [])[1]
+  (execSync('node scripts/check-perf-policy.mjs', { cwd: root, encoding: 'utf8' }).match(/perf policy: (\d+)\//) ??
+    [])[1]
 );
 if (!Number.isInteger(policyCount)) {
   console.error('docs counts: could not read the check:perf-policy total');
   process.exit(1);
 }
-expectIn(readme, 'README.md', new RegExp(`check:perf-policy\\s*#\\s*${policyCount} checks`), `the check:perf-policy row total (${policyCount} checks)`);
+expectIn(
+  readme,
+  'README.md',
+  new RegExp(`check:perf-policy\\s*#\\s*${policyCount} checks`),
+  `the check:perf-policy row total (${policyCount} checks)`
+);
 
 // The remaining quoted counts (issue #31). Each count is declared beside its suite in
 // scripts/counts/<key>.mjs and aggregated by scripts/expected-counts.mjs; the suite asserts its own run
@@ -193,27 +243,108 @@ const expectCount = (doc, docName, pattern, expected, what, minMatches = 1) => {
   }
 };
 // README quotes the verify total twice (quick start and the verification block); both are gated.
-expectCount(readme, 'README.md', /npm run verify\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.verify, 'the verify row total', 2);
-expectCount(readme, 'README.md', /npm run check:style\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.style, 'the check:style row total');
-expectCount(readme, 'README.md', /npm run verify:example-trading\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.trading, 'the verify:example-trading row total');
-expectCount(readme, 'README.md', /npm run check:pack\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.pack, 'the check:pack row total');
-expectCount(readme, 'README.md', /npm run check:release\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.release, 'the check:release row total');
-expectCount(readme, 'README.md', /npm run check:support\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.support, 'the check:support row total');
-expectCount(readme, 'README.md', /npm run check:contract\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.contract, 'the check:contract row total');
-expectCount(readme, 'README.md', /npm run verify:consumer\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.consumer, 'the verify:consumer row total');
-expectCount(readme, 'README.md', /npm run verify:consumer:trading\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.consumerTrading, 'the verify:consumer:trading row total');
+expectCount(
+  readme,
+  'README.md',
+  /npm run verify\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.verify,
+  'the verify row total',
+  2
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run check:style\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.style,
+  'the check:style row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run verify:example-trading\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.trading,
+  'the verify:example-trading row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run check:pack\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.pack,
+  'the check:pack row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run check:release\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.release,
+  'the check:release row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run check:support\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.support,
+  'the check:support row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run check:contract\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.contract,
+  'the check:contract row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run verify:consumer\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.consumer,
+  'the verify:consumer row total'
+);
+expectCount(
+  readme,
+  'README.md',
+  /npm run verify:consumer:trading\s+#\s+(\d+) checks/g,
+  EXPECTED_COUNTS.consumerTrading,
+  'the verify:consumer:trading row total'
+);
 expectCount(readme, 'README.md', /npm run size\s+#\s+(\d+) checks/g, EXPECTED_COUNTS.sizes, 'the size row total');
-expectCount(verification, 'docs/verification.md', /check-size-claims\.mjs`[^\n]*?(\d+) checks/g, EXPECTED_COUNTS.sizes, 'the size-claims total');
-expectCount(verification, 'docs/verification.md', /verify\.mjs`[^\n]*?(\d+) library checks/g, EXPECTED_COUNTS.verify, 'the verify total');
-expectCount(verification, 'docs/verification.md', /check-style\.mjs`[^\n]*?(\d+) checks over/g, EXPECTED_COUNTS.style, 'the check:style total');
-expectCount(verification, 'docs/verification.md', /verify-example\.mjs`[^\n]*?(\d+) checks/g, 10, 'the verify:example total');
+expectCount(
+  verification,
+  'docs/verification.md',
+  /check-size-claims\.mjs`[^\n]*?(\d+) checks/g,
+  EXPECTED_COUNTS.sizes,
+  'the size-claims total'
+);
+expectCount(
+  verification,
+  'docs/verification.md',
+  /verify\.mjs`[^\n]*?(\d+) library checks/g,
+  EXPECTED_COUNTS.verify,
+  'the verify total'
+);
+expectCount(
+  verification,
+  'docs/verification.md',
+  /check-style\.mjs`[^\n]*?(\d+) checks over/g,
+  EXPECTED_COUNTS.style,
+  'the check:style total'
+);
+expectCount(
+  verification,
+  'docs/verification.md',
+  /verify-example\.mjs`[^\n]*?(\d+) checks/g,
+  10,
+  'the verify:example total'
+);
 
 // The unit-test total is a documented number too, and it had rotted exactly as predicted: the README
 // said 14 while the runner reports 17, because nothing watched it (found 2026-09-29 by a drift audit).
 // Counted from the runner itself, like every other total here — TAP is its machine format.
 let testTotal;
 try {
-  testTotal = Number((execSync('node --test --test-reporter=tap', { cwd: root, encoding: 'utf8' }).match(/^# tests (\d+)/m) ?? [])[1]);
+  testTotal = Number(
+    (execSync('node --test --test-reporter=tap', { cwd: root, encoding: 'utf8' }).match(/^# tests (\d+)/m) ?? [])[1]
+  );
 } catch {
   // a failing suite exits non-zero; the guard below turns that into a clear message, not a stack trace
 }
@@ -222,7 +353,12 @@ if (!Number.isInteger(testTotal)) {
   process.exit(1);
 }
 expectCount(readme, 'README.md', /npm test\s+#\s+(\d+) unit tests/g, testTotal, 'the unit-test total');
-forbidIn(readme, 'README.md', /belong in CI artifacts/, 'the "screenshots belong in CI artifacts" claim (contradicts the committed baselines)');
+forbidIn(
+  readme,
+  'README.md',
+  /belong in CI artifacts/,
+  'the "screenshots belong in CI artifacts" claim (contradicts the committed baselines)'
+);
 
 // Every count file must actually be aggregated. A count file nobody imports would let its suite pass
 // on its own declaration while this check never reads the documented total for it - a silent hole, and
@@ -241,11 +377,11 @@ if (unaggregated.length > 0) {
 }
 
 console.log(
-  `docs counts: browser-suite ${compare} compare / ${update} update, verify ${EXPECTED_COUNTS.verify}, `
-  + `style ${EXPECTED_COUNTS.style}, trading ${EXPECTED_COUNTS.trading}, pack ${EXPECTED_COUNTS.pack}, `
-  + `size ${EXPECTED_COUNTS.sizes}, consumer ${EXPECTED_COUNTS.consumer}, consumer-trading ${EXPECTED_COUNTS.consumerTrading}, contract ${EXPECTED_COUNTS.contract}, support ${EXPECTED_COUNTS.support}, release ${EXPECTED_COUNTS.release}, tests ${testTotal}, perf-policy ${policyCount} — `
-  + `README, AGENTS.md, CONTRIBUTING.md and docs/verification.md agree; `
-  + `stale-name scan covers all ${markdownFiles.length} markdown files`
+  `docs counts: browser-suite ${compare} compare / ${update} update, verify ${EXPECTED_COUNTS.verify}, ` +
+    `style ${EXPECTED_COUNTS.style}, trading ${EXPECTED_COUNTS.trading}, pack ${EXPECTED_COUNTS.pack}, ` +
+    `size ${EXPECTED_COUNTS.sizes}, consumer ${EXPECTED_COUNTS.consumer}, consumer-trading ${EXPECTED_COUNTS.consumerTrading}, contract ${EXPECTED_COUNTS.contract}, support ${EXPECTED_COUNTS.support}, release ${EXPECTED_COUNTS.release}, tests ${testTotal}, perf-policy ${policyCount} — ` +
+    `README, AGENTS.md, CONTRIBUTING.md and docs/verification.md agree; ` +
+    `stale-name scan covers all ${markdownFiles.length} markdown files`
 );
 if (stale.length > 0) {
   for (const line of stale) console.error(`  docs drift: ${line}`);

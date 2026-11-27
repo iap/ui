@@ -29,7 +29,17 @@
  */
 import { execFileSync } from 'node:child_process';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, symlinkSync, lstatSync, statSync, realpathSync, readdirSync
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+  symlinkSync,
+  lstatSync,
+  statSync,
+  realpathSync,
+  readdirSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
@@ -44,7 +54,19 @@ const PACKAGES = [
 
 // The surface a consumer is told it can rely on. Not the full export list — an equality check here
 // would turn every added component into a gate failure — but the set the docs and the apps use.
-const PUBLIC_SURFACE = ['Button', 'DataTable', 'Dialog', 'Menu', 'Popover', 'Select', 'Stack', 'Tabs', 'ThemeProvider', 'Tooltip', 'useTicks'];
+const PUBLIC_SURFACE = [
+  'Button',
+  'DataTable',
+  'Dialog',
+  'Menu',
+  'Popover',
+  'Select',
+  'Stack',
+  'Tabs',
+  'ThemeProvider',
+  'Tooltip',
+  'useTicks'
+];
 // A selector the Button renders and a custom property the tokens define: the cheapest honest proof
 // that the CSS that arrived is the library's CSS and not an empty file.
 const CSS_SELECTOR = '.ui-btn';
@@ -56,7 +78,8 @@ const check = (name, ok, detail) => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
 
-const run = (bin, args, options) => execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
+const run = (bin, args, options) =>
+  execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
 const read = (file) => readFileSync(file, 'utf8');
 
 /**
@@ -106,7 +129,13 @@ try {
       if (!existsSync(resolve(root, dir, file))) missing.push(`${dir}/${file}`);
     }
   }
-  check('both publishable packages are built', missing.length === 0, missing.length ? `missing ${missing.join(', ')} — run \`npm run build\`` : `${Object.values(artifacts).flat().length} artifacts`);
+  check(
+    'both publishable packages are built',
+    missing.length === 0,
+    missing.length
+      ? `missing ${missing.join(', ')} — run \`npm run build\``
+      : `${Object.values(artifacts).flat().length} artifacts`
+  );
 
   // ── 2. pack for real ──────────────────────────────────────────────────────
   mkdirSync(tarballs, { recursive: true });
@@ -121,17 +150,31 @@ try {
     } catch (error) {
       // `prepack` runs here (it copies the licence files in), so a broken lifecycle script surfaces
       // as a pack failure rather than weeks later as a consumer's 404.
-      check(`${name}: packs a tarball`, false, String(error.stderr ?? error.message).split('\n').slice(0, 2).join(' '));
+      check(
+        `${name}: packs a tarball`,
+        false,
+        String(error.stderr ?? error.message)
+          .split('\n')
+          .slice(0, 2)
+          .join(' ')
+      );
       continue;
     }
     packed.set(name, file);
     const size = existsSync(file) ? statSync(file).size : 0;
-    check(`${name}: packs a tarball`, size > 0, size ? `${file.split('/').pop()} (${size} bytes)` : 'no tarball written');
+    check(
+      `${name}: packs a tarball`,
+      size > 0,
+      size ? `${file.split('/').pop()} (${size} bytes)` : 'no tarball written'
+    );
   }
 
   // ── 3. install into a project outside the repository ──────────────────────
   mkdirSync(consumer, { recursive: true });
-  writeFileSync(join(consumer, 'package.json'), JSON.stringify({ name: 'consumer-probe', private: true, version: '0.0.0', type: 'module' }, null, 2) + '\n');
+  writeFileSync(
+    join(consumer, 'package.json'),
+    JSON.stringify({ name: 'consumer-probe', private: true, version: '0.0.0', type: 'module' }, null, 2) + '\n'
+  );
   // --offline: the packages have no runtime dependencies, so a correct install needs no registry.
   // --omit=peer: React arrives below, the way a consumer's own project would provide it.
   // --legacy-peer-deps: without it, npm still resolves peer ranges to build the tree — it does not
@@ -144,7 +187,16 @@ try {
   try {
     run(
       npmCommand,
-      npmArgs(['install', ...packed.values(), '--omit=peer', '--legacy-peer-deps', '--no-audit', '--no-fund', '--ignore-scripts', '--offline']),
+      npmArgs([
+        'install',
+        ...packed.values(),
+        '--omit=peer',
+        '--legacy-peer-deps',
+        '--no-audit',
+        '--no-fund',
+        '--ignore-scripts',
+        '--offline'
+      ]),
       npmOptions(consumer)
     );
   } catch (error) {
@@ -154,17 +206,26 @@ try {
   check(
     'the tarballs install into a project outside the repository',
     !installError && installed.every(({ path }) => existsSync(path)),
-    installError ? String(installError.stderr ?? installError.message).split('\n').slice(0, 3).join(' ') : `${installed.length} packages in ${consumer}`
+    installError
+      ? String(installError.stderr ?? installError.message)
+          .split('\n')
+          .slice(0, 3)
+          .join(' ')
+      : `${installed.length} packages in ${consumer}`
   );
 
   // The discriminator. npm symlinks workspace packages; if that is what landed here, every assertion
   // below would be measuring `packages/ui` in the working tree and the gate would be a second
   // check-pack wearing a disguise.
-  const symlinked = installed.filter(({ path }) => existsSync(path) && lstatSync(path).isSymbolicLink()).map(({ name }) => name);
+  const symlinked = installed
+    .filter(({ path }) => existsSync(path) && lstatSync(path).isSymbolicLink())
+    .map(({ name }) => name);
   check(
     'the installed copies are real directories, not workspace links',
     installed.every(({ path }) => existsSync(path)) && symlinked.length === 0,
-    symlinked.length ? `symlinked: ${symlinked.join(', ')} — the workspace is being tested, not the tarball` : 'published contents, not a link'
+    symlinked.length
+      ? `symlinked: ${symlinked.join(', ')} — the workspace is being tested, not the tarball`
+      : 'published contents, not a link'
   );
 
   // The install must pull in nothing but these two packages. `check-contract` asserts the manifests
@@ -272,11 +333,20 @@ console.log('FACTS ' + JSON.stringify(facts));
       return false;
     }
   };
-  const probeFailure = probeError ? String(probeError.stderr || probeError.message).split('\n').slice(0, 3).join(' ') : null;
+  const probeFailure = probeError
+    ? String(probeError.stderr || probeError.message)
+        .split('\n')
+        .slice(0, 3)
+        .join(' ')
+    : null;
 
   check(
     '@trade/ui resolves and imports by name from the installed copy',
-    !probeError && !facts.esmError && !facts.cjsError && insideConsumer(facts.cjsEntry) && facts.cjsEntry.endsWith('index.cjs'),
+    !probeError &&
+      !facts.esmError &&
+      !facts.cjsError &&
+      insideConsumer(facts.cjsEntry) &&
+      facts.cjsEntry.endsWith('index.cjs'),
     probeFailure ?? facts.esmError ?? facts.cjsError ?? facts.cjsEntry
   );
 
@@ -291,7 +361,8 @@ console.log('FACTS ' + JSON.stringify(facts));
   check(
     'CommonJS loads and exports the same surface',
     Array.isArray(facts.cjsExports) && cjsAbsent.length === 0,
-    facts.cjsError ?? (cjsAbsent.length ? `missing ${cjsAbsent.join(', ')}` : `${facts.cjsExports?.length ?? 0} exports`)
+    facts.cjsError ??
+      (cjsAbsent.length ? `missing ${cjsAbsent.join(', ')}` : `${facts.cjsExports?.length ?? 0} exports`)
   );
 
   check(
@@ -304,32 +375,44 @@ console.log('FACTS ' + JSON.stringify(facts));
   check(
     'the resolved stylesheet carries the component styles',
     cssOk,
-    cssOk ? `${facts.cssBytes} bytes, contains ${CSS_SELECTOR}` : facts.cssError ?? `${facts.cssBytes ?? 0} bytes, ${CSS_SELECTOR} absent`
+    cssOk
+      ? `${facts.cssBytes} bytes, contains ${CSS_SELECTOR}`
+      : (facts.cssError ?? `${facts.cssBytes ?? 0} bytes, ${CSS_SELECTOR} absent`)
   );
 
   const tokensOk = insideConsumer(facts.tokensCss) && String(facts.tokensCssSource ?? '').includes(TOKEN_PROPERTY);
   check(
     '@trade/tokens/tokens.css resolves from the installed copy',
     tokensOk,
-    tokensOk ? `${facts.tokensCss.split(sep).pop()}, contains ${TOKEN_PROPERTY}` : facts.tokensError ?? String(facts.tokensCss ?? 'not resolved')
+    tokensOk
+      ? `${facts.tokensCss.split(sep).pop()}, contains ${TOKEN_PROPERTY}`
+      : (facts.tokensError ?? String(facts.tokensCss ?? 'not resolved'))
   );
 
-  const tokensEsmOk = Array.isArray(facts.tokensEsm) && facts.tokensEsm.includes('tokens') && Boolean(facts.tokensEsmVersion);
-  const tokensCjsOk = Array.isArray(facts.tokensCjs) && facts.tokensCjs.includes('tokens') && facts.tokensCjsVersion === facts.tokensEsmVersion;
+  const tokensEsmOk =
+    Array.isArray(facts.tokensEsm) && facts.tokensEsm.includes('tokens') && Boolean(facts.tokensEsmVersion);
+  const tokensCjsOk =
+    Array.isArray(facts.tokensCjs) &&
+    facts.tokensCjs.includes('tokens') &&
+    facts.tokensCjsVersion === facts.tokensEsmVersion;
   check(
     '@trade/tokens loads in ESM and CommonJS and exports the token object',
     tokensEsmOk && tokensCjsOk,
-    facts.tokensEsmError ?? facts.tokensCjsError ??
+    facts.tokensEsmError ??
+      facts.tokensCjsError ??
       `esm=${facts.tokensEsmVersion ?? 'n/a'} [${(facts.tokensEsm ?? []).join(', ') || 'none'}], cjs=${facts.tokensCjsVersion ?? 'n/a'} [${(facts.tokensCjs ?? []).join(', ') || 'none'}]`
   );
 
   // The last structural export. `check:pack` compares the packed per-component stylesheet count
   // against the source set, but nothing resolved one the way a consumer does until this.
-  const componentCssOk = insideConsumer(facts.componentCss) && String(facts.componentCssSource ?? '').includes(CSS_SELECTOR);
+  const componentCssOk =
+    insideConsumer(facts.componentCss) && String(facts.componentCssSource ?? '').includes(CSS_SELECTOR);
   check(
     'a per-component stylesheet resolves through the export map',
     componentCssOk,
-    componentCssOk ? `${facts.componentCss.split(sep).pop()}, contains ${CSS_SELECTOR}` : facts.componentCssError ?? String(facts.componentCss ?? 'not resolved')
+    componentCssOk
+      ? `${facts.componentCss.split(sep).pop()}, contains ${CSS_SELECTOR}`
+      : (facts.componentCssError ?? String(facts.componentCss ?? 'not resolved'))
   );
 
   // ── 5. a bundler, not just Node ───────────────────────────────────────────
@@ -367,19 +450,31 @@ export const Element = () => <Button>Save</Button>;
   // The library must be *in* the bundle: an unresolved bare import would be reported as an external
   // dependency and shipped to the browser as a runtime error.
   const output = metafile ? Object.values(metafile.outputs).find((o) => o.entryPoint) : null;
-  const externals = (output?.imports ?? []).filter((i) => i.external && i.path.startsWith('@trade/')).map((i) => i.path);
+  const externals = (output?.imports ?? [])
+    .filter((i) => i.external && i.path.startsWith('@trade/'))
+    .map((i) => i.path);
   check(
     'a bundler resolves the package and the stylesheet',
     !bundleError && js.includes('ui-btn') && bundledCss.includes(CSS_SELECTOR) && externals.length === 0,
-    bundleError ? String(bundleError.message).split('\n').slice(0, 2).join(' ') : `${js.length} bytes js, ${bundledCss.length} bytes css${externals.length ? `, left external: ${externals.join(', ')}` : ''}`
+    bundleError
+      ? String(bundleError.message).split('\n').slice(0, 2).join(' ')
+      : `${js.length} bytes js, ${bundledCss.length} bytes css${externals.length ? `, left external: ${externals.join(', ')}` : ''}`
   );
 
   // ── 6. it actually renders ────────────────────────────────────────────────
-  const markupOk = typeof facts.markup === 'string' && facts.markup.includes('<button') && facts.markup.includes('ui-btn') && facts.markup.includes('Save');
+  const markupOk =
+    typeof facts.markup === 'string' &&
+    facts.markup.includes('<button') &&
+    facts.markup.includes('ui-btn') &&
+    facts.markup.includes('Save');
   check(
     'a component renders to markup under React',
     markupOk,
-    facts.renderError ? facts.renderError : markupOk ? facts.markup.slice(0, 90) : `unexpected markup: ${String(facts.markup).slice(0, 90)}`
+    facts.renderError
+      ? facts.renderError
+      : markupOk
+        ? facts.markup.slice(0, 90)
+        : `unexpected markup: ${String(facts.markup).slice(0, 90)}`
   );
 
   // ── 7. the types travel too ───────────────────────────────────────────────
@@ -390,7 +485,11 @@ export const Element = () => <Button>Save</Button>;
   // unrunnable there. `typescript/bin/tsc` is a .js file, so this works on every platform.
   const tscEntry = join(root, 'node_modules', 'typescript', 'bin', 'tsc');
   if (!existsSync(tscEntry)) {
-    check('typescript compiles against the installed declarations', false, 'typescript is not installed in node_modules');
+    check(
+      'typescript compiles against the installed declarations',
+      false,
+      'typescript is not installed in node_modules'
+    );
   } else {
     // Several exports, not just one: a declaration dropped for anything a consumer imports must fail
     // here, and referencing each in a type position needs no knowledge of its prop shape.
@@ -437,7 +536,13 @@ export type TokenVersion = typeof tokens.version;
     check(
       'typescript compiles against the installed declarations',
       !tscError,
-      tscError ? String(tscError.stdout ?? tscError.message).split('\n').filter(Boolean).slice(0, 2).join(' ') : 'tsc --strict resolves @trade/ui and react-jsx'
+      tscError
+        ? String(tscError.stdout ?? tscError.message)
+            .split('\n')
+            .filter(Boolean)
+            .slice(0, 2)
+            .join(' ')
+        : 'tsc --strict resolves @trade/ui and react-jsx'
     );
   }
 } finally {
@@ -446,13 +551,19 @@ export type TokenVersion = typeof tokens.version;
 
 const failed = checks.filter((c) => !c.ok);
 if (checks.length !== EXPECTED_COUNTS.consumer) {
-  console.error(`consumer contract: ran ${checks.length} checks, scripts/counts/consumer.mjs declares ${EXPECTED_COUNTS.consumer}`);
+  console.error(
+    `consumer contract: ran ${checks.length} checks, scripts/counts/consumer.mjs declares ${EXPECTED_COUNTS.consumer}`
+  );
   process.exit(1);
 }
 if (failed.length > 0) {
   console.error(`\nconsumer contract: ${checks.length - failed.length}/${checks.length} checks passed`);
-  console.error('The tarball is what a consumer receives: a failure here means they cannot install, resolve or use it.');
+  console.error(
+    'The tarball is what a consumer receives: a failure here means they cannot install, resolve or use it.'
+  );
   if (keep) console.error(`Scratch project kept at ${work}`);
   process.exit(1);
 }
-console.log(`\nconsumer contract: ${checks.length}/${checks.length} checks passed — the tarball works for someone who did not write it`);
+console.log(
+  `\nconsumer contract: ${checks.length}/${checks.length} checks passed — the tarball works for someone who did not write it`
+);

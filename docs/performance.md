@@ -12,13 +12,13 @@ gzipped — is bounded by `size-limit` via the `@size-limit/esbuild` provider. T
 unminified artifacts that are actually published are bounded separately by `verify.mjs`, because a
 size-limit entry says nothing about the size of a tarball's `dist/index.cjs`.
 
-| Artifact | Budget (gzip) | Gate |
-|---|---|---|
-| `@trade/ui` ESM, full surface | 7 kB | `npm run size` |
-| `@trade/ui` ESM, `Button` only (tree-shaking guard) | 1.5 kB | `npm run size` |
-| `@trade/ui` CJS, full surface | 7.5 kB | `npm run size` |
-| Stylesheet, all components | 8 kB | `npm run size` |
-| Published `dist/` — `index.js` · `index.cjs` · `ui.css` · `index.d.ts` | 12 / 12 / 8 / 3 kB | `verify.mjs` |
+| Artifact                                                               | Budget (gzip)      | Gate           |
+| ---------------------------------------------------------------------- | ------------------ | -------------- |
+| `@trade/ui` ESM, full surface                                          | 7 kB               | `npm run size` |
+| `@trade/ui` ESM, `Button` only (tree-shaking guard)                    | 1.5 kB             | `npm run size` |
+| `@trade/ui` CJS, full surface                                          | 7.5 kB             | `npm run size` |
+| Stylesheet, all components                                             | 8 kB               | `npm run size` |
+| Published `dist/` — `index.js` · `index.cjs` · `ui.css` · `index.d.ts` | 12 / 12 / 8 / 3 kB | `verify.mjs`   |
 
 Measured values live in [STATUS.md](../STATUS.md) and are tabulated per entry in
 [verification.md](verification.md). Both are gated by `scripts/check-size-claims.mjs`, which is why
@@ -33,7 +33,7 @@ hot-path weight, tree-shakeable per-area CSS imports.
 
 ```js
 const T = {
-  maxP95FrameMs: 25,          // 25, not 20: 16.7 ms frames at 60 Hz; 20 gave false failures at p95=22
+  maxP95FrameMs: 25, // 25, not 20: 16.7 ms frames at 60 Hz; 20 gave false failures at p95=22
   maxDroppedFrameRatio: 0.05, // frames > 33 ms over steady frames
   maxOverflowPx: 1,
   maxAxeViolations: 0,
@@ -77,7 +77,7 @@ story: [verification.md](verification.md) and [STATUS.md](../STATUS.md).
 `DataTable` ships **no virtualizer** — it renders whatever rows it is given. The contract is the
 honesty mechanism: pass `rowCount` (full dataset), `rowOffset` (index of the first supplied row)
 and `rowHeight`, and the table emits `aria-hidden` spacer rows plus an `aria-rowcount` covering
-the *whole* dataset, so screen readers see the truth while the DOM holds a window. Verified at
+the _whole_ dataset, so screen readers see the truth while the DOM holds a window. Verified at
 5,000-row SSR scale and 200,000-row live scale. Consumers plug in their own windowing; `useTicks`
 (below) is what bounds how often new rows reach it.
 
@@ -115,5 +115,5 @@ From CONTRIBUTING §5 and the ADRs — the rules that make the numbers above rep
 6. **Coalesce the feed, not the paint.** `useTicks` bounds renders to the display's cadence; the
    library never renders more frames than the screen can show.
 
-Commit evidence follows the same discipline: numbers, not adjectives — *"p95 16.7 ms → 12.1 ms
-over 90 frames, `npm run verify:browser`"*, per CONTRIBUTING §7.
+Commit evidence follows the same discipline: numbers, not adjectives — _"p95 16.7 ms → 12.1 ms
+over 90 frames, `npm run verify:browser`"_, per CONTRIBUTING §7.

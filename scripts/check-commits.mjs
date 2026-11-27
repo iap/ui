@@ -28,9 +28,12 @@ const subjectOf = (sha) =>
 // at HEAD, and checking its generated subject made `npm run ci` fail locally.
 const isMerge = (sha) =>
   execFileSync('git', ['rev-list', '--parents', '-1', sha], { encoding: 'utf8' }).trim().split(/\s+/).length > 2;
-const shas = (range
-  ? execSync(`git rev-list --no-merges ${range}`, { encoding: 'utf8' }).trim().split('\n')
-  : (isMerge('HEAD') ? [] : ['HEAD'])
+const shas = (
+  range
+    ? execSync(`git rev-list --no-merges ${range}`, { encoding: 'utf8' }).trim().split('\n')
+    : isMerge('HEAD')
+      ? []
+      : ['HEAD']
 ).filter(Boolean);
 
 let bad = 0;

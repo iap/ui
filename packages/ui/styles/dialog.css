@@ -39,9 +39,16 @@
   border-bottom: var(--ui-size-border-width) solid var(--ui-outline);
 }
 
-.ui-dialog__title { margin: 0; font-size: var(--ui-font-size-lg); font-weight: 500; }
+.ui-dialog__title {
+  margin: 0;
+  font-size: var(--ui-font-size-lg);
+  font-weight: 500;
+}
 
-.ui-dialog__body { padding: var(--ui-space-5); overflow: auto; }
+.ui-dialog__body {
+  padding: var(--ui-space-5);
+  overflow: auto;
+}
 
 .ui-dialog__footer {
   display: flex;

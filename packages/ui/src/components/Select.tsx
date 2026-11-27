@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 import { forwardRef, useEffect, useId, useRef, useState } from 'react';
-import type { ButtonHTMLAttributes, ChangeEvent, ForwardRefExoticComponent, KeyboardEvent, ReactNode, Ref, RefAttributes, SelectHTMLAttributes } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  ChangeEvent,
+  ForwardRefExoticComponent,
+  KeyboardEvent,
+  ReactNode,
+  Ref,
+  RefAttributes,
+  SelectHTMLAttributes
+} from 'react';
 import { cx } from '../internal/cx';
 import { useIsomorphicLayoutEffect } from '../internal/useIsomorphicLayoutEffect';
 import type { Density } from './Stack';
@@ -36,11 +45,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * The listbox variant shares the native variant's onChange event shape so consumer
  * handlers never branch on the variant; the adapter documents that contract.
  */
-function emitValueChange(
-  onChange: SelectProps['onChange'] | undefined,
-  value: string,
-  name: string | undefined
-) {
+function emitValueChange(onChange: SelectProps['onChange'] | undefined, value: string, name: string | undefined) {
   onChange?.({ target: { value, name } } as unknown as ChangeEvent<HTMLSelectElement>);
 }
 
@@ -96,11 +101,11 @@ function SelectListbox({
     const pool = enabledIndexes;
     if (pool.length === 0) return from;
     const pos = pool.indexOf(from);
-    return pool[(((pos === -1 ? 0 : pos) + dir) % pool.length + pool.length) % pool.length];
+    return pool[((((pos === -1 ? 0 : pos) + dir) % pool.length) + pool.length) % pool.length];
   };
 
   const openPanel = (initial?: number) => {
-    const start = enabledIndexes.includes(selectedIdx) ? selectedIdx : enabledIndexes[0] ?? -1;
+    const start = enabledIndexes.includes(selectedIdx) ? selectedIdx : (enabledIndexes[0] ?? -1);
     setActive(initial ?? start);
     setOpen(true);
   };
@@ -122,7 +127,7 @@ function SelectListbox({
     const pool = enabledIndexes.length ? enabledIndexes : options.map((_, i) => i);
     const start = active;
     for (let n = 1; n <= pool.length; n++) {
-      const idx = pool[(((start === -1 ? 0 : pool.indexOf(start)) + n) % pool.length + pool.length) % pool.length];
+      const idx = pool[((((start === -1 ? 0 : pool.indexOf(start)) + n) % pool.length) + pool.length) % pool.length];
       if (options[idx]?.label.toLowerCase().startsWith(buf)) return idx;
     }
     return -1;
@@ -193,9 +198,7 @@ function SelectListbox({
   // missing in some environments (jsdom), hence the optional call
   useIsomorphicLayoutEffect(() => {
     if (!open) return;
-    panelRef.current
-      ?.querySelector('.ui-select-lb__option--active')
-      ?.scrollIntoView?.({ block: 'nearest' });
+    panelRef.current?.querySelector('.ui-select-lb__option--active')?.scrollIntoView?.({ block: 'nearest' });
   }, [open, active]);
 
   useEffect(() => {
@@ -241,9 +244,7 @@ function SelectListbox({
           ▾
         </span>
       </button>
-      {name ? (
-        <input type="hidden" name={name} value={selected} disabled={disabled} form={form} />
-      ) : null}
+      {name ? <input type="hidden" name={name} value={selected} disabled={disabled} form={form} /> : null}
       {open ? (
         <div
           ref={panelRef}
@@ -276,9 +277,7 @@ function SelectListbox({
 type SelectComponent = ForwardRefExoticComponent<
   Omit<SelectProps, 'variant'> & { variant?: 'native' } & RefAttributes<HTMLSelectElement>
 > &
-  ForwardRefExoticComponent<
-    Omit<SelectProps, 'variant'> & { variant: 'listbox' } & RefAttributes<HTMLButtonElement>
-  >;
+  ForwardRefExoticComponent<Omit<SelectProps, 'variant'> & { variant: 'listbox' } & RefAttributes<HTMLButtonElement>>;
 
 function SelectImpl(
   { options, placeholder, density, invalid = false, variant = 'native', className, ...rest }: SelectProps,

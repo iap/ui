@@ -50,7 +50,16 @@ if (!existsSync(tokensCss)) {
   console.error('missing @trade/tokens dist/tokens.css — run the tokens build first');
   process.exit(1);
 }
-const order = ['base.css', 'layout.css', 'button.css', 'forms.css', 'table.css', 'tabs.css', 'feedback.css', 'dialog.css'];
+const order = [
+  'base.css',
+  'layout.css',
+  'button.css',
+  'forms.css',
+  'table.css',
+  'tabs.css',
+  'feedback.css',
+  'dialog.css'
+];
 const files = readdirSync(stylesDir).filter((f) => f.endsWith('.css'));
 const ordered = [...order.filter((f) => files.includes(f)), ...files.filter((f) => !order.includes(f))];
 
@@ -63,5 +72,13 @@ for (const f of ordered) {
 writeFileSync(join(dist, 'ui.css'), combined, 'utf8');
 
 console.log(
-  JSON.stringify({ ok: true, files: ['dist/index.js', 'dist/index.cjs', 'dist/ui.css', 'dist/index.d.ts'], cssFiles: ordered.length }, null, 2)
+  JSON.stringify(
+    {
+      ok: true,
+      files: ['dist/index.js', 'dist/index.cjs', 'dist/ui.css', 'dist/index.d.ts'],
+      cssFiles: ordered.length
+    },
+    null,
+    2
+  )
 );
