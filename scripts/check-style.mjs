@@ -37,8 +37,7 @@ const PREFIX_ALLOWLIST = new Set(['-webkit-font-smoothing', '-webkit-text-size-a
  * negate it or OR it with anything else — `@media not (hover: hover)` and
  * `@media (hover: hover), (pointer: coarse)` both match devices that cannot hover.
  */
-const isHoverGuard = (prelude) =>
-  /hover:\s*hover/.test(prelude) && !prelude.includes(',') && !/\bnot\b/.test(prelude);
+const isHoverGuard = (prelude) => /hover:\s*hover/.test(prelude) && !prelude.includes(',') && !/\bnot\b/.test(prelude);
 
 function stripHoverGuards(css) {
   let out = '';
@@ -81,13 +80,22 @@ function stripHoverGuards(css) {
 function checkFile(checks, file, css, { namespaced }) {
   const check = (name, violations) =>
     checks.push({ name, pass: violations.length === 0, detail: violations.slice(0, 5).join(' | ') || 'clean' });
-  const decls = [...css.matchAll(/([-\w]+)\s*:\s*([^;{}]+);/g)].map((m) => ({ prop: m[1], value: m[2].trim(), at: m[0] }));
+  const decls = [...css.matchAll(/([-\w]+)\s*:\s*([^;{}]+);/g)].map((m) => ({
+    prop: m[1],
+    value: m[2].trim(),
+    at: m[0]
+  }));
 
   // 1. colour comes from tokens only — no literals anywhere in a declaration value
   check(
     `${file}: no raw colour literals`,
     decls
-      .filter(({ value }) => /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/.test(value) || value.split(/[\s/,]+/).includes('white') || value.split(/[\s/,]+/).includes('black'))
+      .filter(
+        ({ value }) =>
+          /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/.test(value) ||
+          value.split(/[\s/,]+/).includes('white') ||
+          value.split(/[\s/,]+/).includes('black')
+      )
       .map(({ at }) => at)
   );
 
@@ -116,7 +124,9 @@ function checkFile(checks, file, css, { namespaced }) {
   );
   check(
     `${file}: box-shadow only via --ui-elevation-*`,
-    decls.filter(({ prop, value }) => prop === 'box-shadow' && !value.startsWith('var(--ui-elevation-')).map(({ at }) => at)
+    decls
+      .filter(({ prop, value }) => prop === 'box-shadow' && !value.startsWith('var(--ui-elevation-'))
+      .map(({ at }) => at)
   );
 
   // 4. motion is off: the only allowed transition/animation value is none
@@ -126,12 +136,17 @@ function checkFile(checks, file, css, { namespaced }) {
   );
 
   // 5. specificity discipline: no !important, ever
-  check(`${file}: no !important`, decls.filter(({ value }) => value.includes('!important')).map(({ at }) => at));
+  check(
+    `${file}: no !important`,
+    decls.filter(({ value }) => value.includes('!important')).map(({ at }) => at)
+  );
 
   // 6. type scale is a token
   check(
     `${file}: font-size only via tokens or inherit`,
-    decls.filter(({ prop, value }) => prop === 'font-size' && !/^(var\(--ui-font-size-|inherit)/.test(value)).map(({ at }) => at)
+    decls
+      .filter(({ prop, value }) => prop === 'font-size' && !/^(var\(--ui-font-size-|inherit)/.test(value))
+      .map(({ at }) => at)
   );
 
   // 7. namespace: library classes we author live under .ui- (app stylesheets target the
@@ -139,7 +154,9 @@ function checkFile(checks, file, css, { namespaced }) {
   if (namespaced) {
     check(
       `${file}: classes are namespaced .ui-*`,
-      [...css.matchAll(/(?<![\w-])\.([a-zA-Z][\w-]*)/g)].filter((m) => !/^ui-/.test(m[1]) && !/^(dark|light)$/.test(m[1])).map((m) => `.${m[1]}`)
+      [...css.matchAll(/(?<![\w-])\.([a-zA-Z][\w-]*)/g)]
+        .filter((m) => !/^ui-/.test(m[1]) && !/^(dark|light)$/.test(m[1]))
+        .map((m) => `.${m[1]}`)
     );
   }
 
@@ -206,17 +223,21 @@ const deadEntries = [...PREFIX_ALLOWLIST].filter((prefix) => !baseProps.has(pref
 checks.push({
   name: `prefix allowlist entries are declared in base.css (${[...PREFIX_ALLOWLIST].join(', ')})`,
   pass: deadEntries.length === 0,
-  detail: deadEntries.length ? `${deadEntries.join(', ')} — remove the entry, or restore its declaration in base.css` : 'every entry is declared in base.css'
+  detail: deadEntries.length
+    ? `${deadEntries.join(', ')} — remove the entry, or restore its declaration in base.css`
+    : 'every entry is declared in base.css'
 });
 
 if (checks.length !== EXPECTED_COUNTS.style) {
   console.error(
-    `style contract: ${checks.length} checks ran but scripts/counts/style.mjs declares ${EXPECTED_COUNTS.style}. `
-    + 'Update that number and the docs it feeds in the same change, then run check:docs.'
+    `style contract: ${checks.length} checks ran but scripts/counts/style.mjs declares ${EXPECTED_COUNTS.style}. ` +
+      'Update that number and the docs it feeds in the same change, then run check:docs.'
   );
   process.exit(1);
 }
 const failed = checks.filter((c) => !c.pass);
-console.log(`style contract: ${checks.length - failed.length}/${checks.length} checks passed (${readdirSync(stylesDir).filter((f) => f.endsWith('.css')).length} library + ${appSheets.length} app stylesheets, + 1 allowlist check)`);
+console.log(
+  `style contract: ${checks.length - failed.length}/${checks.length} checks passed (${readdirSync(stylesDir).filter((f) => f.endsWith('.css')).length} library + ${appSheets.length} app stylesheets, + 1 allowlist check)`
+);
 for (const c of checks) console.log(`  ${c.pass ? 'PASS' : 'FAIL'}  ${c.name}${c.pass ? '' : ' -> ' + c.detail}`);
 process.exit(failed.length ? 1 : 0);

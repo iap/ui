@@ -26,20 +26,48 @@ const tokens = read('packages/tokens/package.json');
 
 // 1. zero runtime dependencies — the headline promise
 const deps = Object.keys(ui.dependencies ?? {});
-check('@trade/ui has zero runtime dependencies', deps.length === 0, `dependencies = ${JSON.stringify(ui.dependencies ?? {})}`);
+check(
+  '@trade/ui has zero runtime dependencies',
+  deps.length === 0,
+  `dependencies = ${JSON.stringify(ui.dependencies ?? {})}`
+);
 const tokenDeps = Object.keys(tokens.dependencies ?? {});
-check('@trade/tokens has zero runtime dependencies', tokenDeps.length === 0, `dependencies = ${JSON.stringify(tokens.dependencies ?? {})}`);
+check(
+  '@trade/tokens has zero runtime dependencies',
+  tokenDeps.length === 0,
+  `dependencies = ${JSON.stringify(tokens.dependencies ?? {})}`
+);
 
 // 2. React must never be bundled or installed by us
-check('React is a peer, not a dependency', Boolean(ui.peerDependencies?.react) && !('react' in (ui.dependencies ?? {})), `peerDependencies = ${JSON.stringify(ui.peerDependencies ?? {})}`);
-check('React DOM is a peer, not a dependency', Boolean(ui.peerDependencies?.['react-dom']) && !('react-dom' in (ui.dependencies ?? {})), `peerDependencies = ${JSON.stringify(ui.peerDependencies ?? {})}`);
+check(
+  'React is a peer, not a dependency',
+  Boolean(ui.peerDependencies?.react) && !('react' in (ui.dependencies ?? {})),
+  `peerDependencies = ${JSON.stringify(ui.peerDependencies ?? {})}`
+);
+check(
+  'React DOM is a peer, not a dependency',
+  Boolean(ui.peerDependencies?.['react-dom']) && !('react-dom' in (ui.dependencies ?? {})),
+  `peerDependencies = ${JSON.stringify(ui.peerDependencies ?? {})}`
+);
 
 // 3. tree-shaking
-check('sideEffects is false (tree-shakeable)', ui.sideEffects === false, `sideEffects = ${JSON.stringify(ui.sideEffects)}`);
+check(
+  'sideEffects is false (tree-shakeable)',
+  ui.sideEffects === false,
+  `sideEffects = ${JSON.stringify(ui.sideEffects)}`
+);
 
 // 4. the exports map consumers rely on
-check('exports map exposes JS', Boolean(ui.exports?.['.']?.import && ui.exports?.['.']?.require && ui.exports?.['.']?.types), Object.keys(ui.exports ?? {}).join(', '));
-check('exports map exposes the stylesheet', ui.exports?.['./styles.css'] === './dist/ui.css', `./styles.css = ${ui.exports?.['./styles.css']}`);
+check(
+  'exports map exposes JS',
+  Boolean(ui.exports?.['.']?.import && ui.exports?.['.']?.require && ui.exports?.['.']?.types),
+  Object.keys(ui.exports ?? {}).join(', ')
+);
+check(
+  'exports map exposes the stylesheet',
+  ui.exports?.['./styles.css'] === './dist/ui.css',
+  `./styles.css = ${ui.exports?.['./styles.css']}`
+);
 
 // 5. published files stay minimal — the build output plus the licence terms the package declares
 const ALLOWED_FILES = new Set(['dist', 'LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE']);
@@ -51,9 +79,18 @@ check(
 );
 
 // 6. build output exists and is non-trivial
-for (const f of ['packages/ui/dist/index.js', 'packages/ui/dist/index.cjs', 'packages/ui/dist/ui.css', 'packages/ui/dist/index.d.ts']) {
+for (const f of [
+  'packages/ui/dist/index.js',
+  'packages/ui/dist/index.cjs',
+  'packages/ui/dist/ui.css',
+  'packages/ui/dist/index.d.ts'
+]) {
   const abs = resolve(root, f);
-  check(`build artifact present: ${f.replace('packages/ui/dist/', '')}`, existsSync(abs), existsSync(abs) ? `${readFileSync(abs).length} bytes` : 'MISSING — run npm run build');
+  check(
+    `build artifact present: ${f.replace('packages/ui/dist/', '')}`,
+    existsSync(abs),
+    existsSync(abs) ? `${readFileSync(abs).length} bytes` : 'MISSING — run npm run build'
+  );
 }
 
 // 7. one version, one meaning (issue #76)
@@ -67,7 +104,9 @@ const versions = { root: rootPkg.version, ui: ui.version, tokens: tokens.version
 check(
   'every manifest declares the same version',
   new Set(Object.values(versions)).size === 1 && Boolean(ui.version),
-  Object.entries(versions).map(([k, v]) => `${k}=${v}`).join(', ')
+  Object.entries(versions)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(', ')
 );
 check(
   'the token schema version is named schemaVersion, not version',
@@ -83,7 +122,9 @@ check(
 );
 // `"version"` exactly: `"schemaVersion"` has no quote before it, so the two cannot be confused.
 const tokensTs = resolve(root, 'packages/tokens/dist/tokens.ts');
-const moduleVersion = existsSync(tokensTs) ? (readFileSync(tokensTs, 'utf8').match(/"version": "([^"]+)"/) ?? [])[1] : undefined;
+const moduleVersion = existsSync(tokensTs)
+  ? (readFileSync(tokensTs, 'utf8').match(/"version": "([^"]+)"/) ?? [])[1]
+  : undefined;
 check(
   'the emitted token module exports the package version',
   moduleVersion === ui.version,
@@ -92,7 +133,9 @@ check(
 
 const passed = checks.filter((c) => c.pass).length;
 if (checks.length !== EXPECTED_COUNTS.contract) {
-  console.error(`contract: ran ${checks.length} checks, scripts/counts/contract.mjs declares ${EXPECTED_COUNTS.contract}`);
+  console.error(
+    `contract: ran ${checks.length} checks, scripts/counts/contract.mjs declares ${EXPECTED_COUNTS.contract}`
+  );
   process.exit(1);
 }
 console.log(`contract: ${passed}/${checks.length} checks passed`);

@@ -30,7 +30,11 @@ const t = JSON.parse(readFileSync(source, 'utf8'));
 // "0.2.0" inside a 0.1.0 package, and nothing asserted anything about version at all (issue #76).
 const pkg = JSON.parse(readFileSync(resolve(here, 'package.json'), 'utf8'));
 const P = t.primitive;
-const kebab = (s) => String(s).replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/[_\s]+/g, '-').toLowerCase();
+const kebab = (s) =>
+  String(s)
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/[_\s]+/g, '-')
+    .toLowerCase();
 
 const errors = [];
 const refName = (ns, name, variant) => {
@@ -57,7 +61,9 @@ function resolveRef(value, where) {
   if (variant === undefined && typeof entry !== 'string') {
     // A group reference (e.g. {colour.indigo}) would emit var(--ui-ref-indigo), but only leaves
     // are emitted as variables - so the reference would dangle and the browser would drop it.
-    errors.push(`${where}: "${ns}.${name}" is a group, not a scalar leaf - reference a variant (e.g. ${ns}.${name}.<variant>)`);
+    errors.push(
+      `${where}: "${ns}.${name}" is a group, not a scalar leaf - reference a variant (e.g. ${ns}.${name}.<variant>)`
+    );
     return null;
   }
   if (variant !== undefined) {
@@ -90,7 +96,9 @@ themeNames.forEach((n, i) => {
   if (roleSets[i] !== reference) {
     const missing = reference.split(',').filter((r) => !roleSets[i].split(',').includes(r));
     const extra = roleSets[i].split(',').filter((r) => !reference.split(',').includes(r));
-    errors.push(`theme "${n}" diverges from the role set (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'})`);
+    errors.push(
+      `theme "${n}" diverges from the role set (missing: ${missing.join(', ') || 'none'}; extra: ${extra.join(', ') || 'none'})`
+    );
   }
 });
 

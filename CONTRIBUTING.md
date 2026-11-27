@@ -3,7 +3,7 @@
 This is a component system for dense, data-heavy interfaces: **static CSS**, **token-driven themes**,
 **zero runtime dependencies**, **no animation**. Every rule below exists because breaking it has a
 cost someone else pays — a reflow at 60 Hz, a theme that fails contrast, a layout that dies in RTL.
-Most rules are enforced by a gate; where a rule says *gated*, CI already checks it and you will not
+Most rules are enforced by a gate; where a rule says _gated_, CI already checks it and you will not
 be able to land a violation. Where it is not gated, it is review discipline.
 
 **Read order for anything non-trivial:** `README.md` (what/how) → `DECISIONS.md` (why, immutable) →
@@ -15,49 +15,49 @@ this file (how to change things safely) → `STATUS.md` (where the project stand
 
 These apply to every change. Each is cheap to follow and expensive to break.
 
-1. **Components read roles, never primitives.** A component may only reference theme *role*
+1. **Components read roles, never primitives.** A component may only reference theme _role_
    variables (`--ui-primary`, `--ui-on-surface`, …). Raw values — hex, `rgb()`, font sizes, z-index
    numbers, shadow literals — belong in `packages/tokens/tokens.json` tier 1 and nowhere else.
-   *Gated:* `check-style.mjs`, and the all-themes literal check in `verify.mjs`.
-2. **A theme is a mapping, not a stylesheet.** Every theme in `tokens.json` defines the *same* role
+   _Gated:_ `check-style.mjs`, and the all-themes literal check in `verify.mjs`.
+2. **A theme is a mapping, not a stylesheet.** Every theme in `tokens.json` defines the _same_ role
    set, each role a `{primitive.reference}` — no literals, no extra roles, no missing roles. Adding
    a role means adding it to **all three themes** before the build will pass.
-   *Gated:* `build-tokens.mjs` fails on divergence; `check-contrast.mjs` fails on illegible pairs.
+   _Gated:_ `build-tokens.mjs` fails on divergence; `check-contrast.mjs` fails on illegible pairs.
 3. **CSS is static and structural.** One hand-written file per area in `packages/ui/styles/`, class
    selectors rooted at `.ui-*`, no CSS-in-JS, no inline `style` props, no `!important`, single-class
-   specificity by default. *Gated:* `check-style.mjs`.
+   specificity by default. _Gated:_ `check-style.mjs`.
 4. **Motion does not exist.** The only permitted `transition`/`animation` value is `none`. Reduced-
-   motion compliance is satisfied by construction. *Gated:* `check-style.mjs` + stylesheet scan in
+   motion compliance is satisfied by construction. _Gated:_ `check-style.mjs` + stylesheet scan in
    `verify.mjs`.
 5. **Layout is direction-agnostic.** Use logical properties (`inline-start`/`inline-end`, `start`/`end`)
    — never `left`/`right` physical forms. An RTL user gets a correct mirror for free.
-   *Gated:* `check-style.mjs`.
+   _Gated:_ `check-style.mjs`.
 6. **Stacking and depth are scales.** `z-index` only via `--ui-z-*`; `box-shadow` only via
    `--ui-elevation-*`. Local z-index decisions are how two overlays end up fighting.
-   *Gated:* `check-style.mjs`.
+   _Gated:_ `check-style.mjs`.
 7. **Zero runtime dependencies is a contract.** React and React DOM are peers. Nothing else —
    no hooks libraries, no headless primitives, no class-name utilities. If hand-rolling a primitive
    ever costs more than a dependency would, take it to `DECISIONS.md` first (see ADR-002's revisit
-   criterion) — do not just add the package. *Gated:* `check-contract.mjs`.
+   criterion) — do not just add the package. _Gated:_ `check-contract.mjs`.
 8. **Accessibility is functional correctness.** A component that renders but fails keyboard or ARIA
    semantics is broken. Focus-visible rings everywhere, honest ARIA counts (`aria-rowcount` reflects
    data, not DOM), colour never the only signal (pair with glyphs/text), dialogs trap and restore
-   focus. *Gated:* axe in both themes × 3 engines, DOM interaction tests in `verify.mjs`.
+   focus. _Gated:_ axe in both themes × 3 engines, DOM interaction tests in `verify.mjs`.
 
 ## 2. The token model in practice
 
 Three tiers, compiled by `packages/tokens/build-tokens.mjs`:
 
-| Tier | Lives in | Emits | You touch it when |
-|---|---|---|---|
-| Primitive (raw values) | `tokens.json → primitive` | `--ui-ref-*` | adding a colour step or a new scale value |
-| Theme role (meaning) | `tokens.json → themes` | `--ui-<role>` mapping to refs | naming a new semantic colour |
-| Structural (theme-less) | `tokens.json → primitive.{space,radius,font,elevation,zIndex,opacity,density}` | `--ui-space-*` etc. | changing rhythm/scale — frozen, see ADR-001 |
+| Tier                    | Lives in                                                                       | Emits                         | You touch it when                           |
+| ----------------------- | ------------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------- |
+| Primitive (raw values)  | `tokens.json → primitive`                                                      | `--ui-ref-*`                  | adding a colour step or a new scale value   |
+| Theme role (meaning)    | `tokens.json → themes`                                                         | `--ui-<role>` mapping to refs | naming a new semantic colour                |
+| Structural (theme-less) | `tokens.json → primitive.{space,radius,font,elevation,zIndex,opacity,density}` | `--ui-space-*` etc.           | changing rhythm/scale — frozen, see ADR-001 |
 
 - **Change a colour:** edit `themes.<theme>.<role>` to point at a different primitive. Never edit a
   component. Run `npm run build && npm run check:contrast` — the contrast contract must hold in all
   themes or the build fails.
-- **Add a role:** add the key to *every* theme in the same commit, referencing primitives. Then add
+- **Add a role:** add the key to _every_ theme in the same commit, referencing primitives. Then add
   the pair to `scripts/check-contrast.mjs` if it forms a foreground/background pair. Unmeasured
   pairs are how illegible themes ship.
 - **Add a theme:** add a `themes.<name>` object with the identical role set, and declare
@@ -74,8 +74,12 @@ Three tiers, compiled by `packages/tokens/build-tokens.mjs`:
    order genuinely matters. Follow the laws above. Density: dimensions read
    `calc(<px> * var(--ui-density))` so the compact/dense classes work everywhere:
    ```css
-   .ui-badge--compact { --ui-density: var(--ui-density-compact); }
-   .ui-badge--dense   { --ui-density: var(--ui-density-dense); }
+   .ui-badge--compact {
+     --ui-density: var(--ui-density-compact);
+   }
+   .ui-badge--dense {
+     --ui-density: var(--ui-density-dense);
+   }
    ```
 3. **Component** in `src/components/<Name>.tsx`:
    - `forwardRef`, always. DOM components spread `...rest` after destructuring your props.
@@ -85,7 +89,9 @@ Three tiers, compiled by `packages/tokens/build-tokens.mjs`:
      them — the library must server-render without warnings.
    ```tsx
    export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-     { tone = 'info', className, ...rest }, ref) {
+     { tone = 'info', className, ...rest },
+     ref
+   ) {
      return <span ref={ref} className={cx('ui-badge', `ui-badge--${tone}`, className)} {...rest} />;
    });
    ```
@@ -122,7 +128,7 @@ The library exists for screens that re-render continuously. The hot path rules:
 - Tables render a window, not the dataset; ARIA counts stay honest (`aria-rowcount`) so consumers
   can virtualize. Don't break that with full-list renders.
 - `transition: none` everywhere means every state change is one paint. Keep it that way.
-- Budgets: ESM ≤ 8 kB gzip, CSS ≤ 8 kB gzip, types ≤ 3 kB. *Gated:* `npm run size`.
+- Budgets: ESM ≤ 8 kB gzip, CSS ≤ 8 kB gzip, types ≤ 3 kB. _Gated:_ `npm run size`.
 
 ## 6. Definition of done
 
@@ -145,10 +151,10 @@ Done also means:
 Conventions live in `README.md` § Git. Subjects follow `type(scope): summary`, matching the
 `trade/ui` org convention (see its `CONTRIBUTING.md`):
 
-| Part | Rule |
-|---|---|
-| `type` | One of `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci` |
-| `scope` | Optional area touched, lowercase (e.g. `ui`, `tokens`, `verify`, `ci`) |
+| Part      | Rule                                                                      |
+| --------- | ------------------------------------------------------------------------- |
+| `type`    | One of `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`           |
+| `scope`   | Optional area touched, lowercase (e.g. `ui`, `tokens`, `verify`, `ci`)    |
 | `summary` | Imperative mood, no trailing period; **aim ≤ 50 characters, 72 hard max** |
 
 ```
@@ -159,8 +165,8 @@ docs(agents): drop the duplicated file inventory
 `ci` is an addition to the org's list (`feat fix docs chore refactor test`) — this repo's CI is a
 first-class concern and its history already uses the prefix.
 
-One concern per commit, and the body carries the *evidence* — the measurement and the command that
-produced it, and the *why*, not what the diff already shows. "Made the table faster" is not
+One concern per commit, and the body carries the _evidence_ — the measurement and the command that
+produced it, and the _why_, not what the diff already shows. "Made the table faster" is not
 evidence; "p95 16.7 ms → 12.1 ms over 90 frames, `npm run verify:browser`" is. State only what you
 actually verified.
 
@@ -175,14 +181,14 @@ compare run.
 Branches use a lowercase type prefix and a short slash-separated description, again mirroring
 `trade/ui`'s `CONTRIBUTING.md`:
 
-| Prefix | Use for |
-|---|---|
-| `feat/` | New features or capabilities |
-| `fix/` | Bug fixes |
-| `docs/` | Documentation-only changes |
-| `chore/` | Maintenance (deps, tooling, config) |
+| Prefix      | Use for                                               |
+| ----------- | ----------------------------------------------------- |
+| `feat/`     | New features or capabilities                          |
+| `fix/`      | Bug fixes                                             |
+| `docs/`     | Documentation-only changes                            |
+| `chore/`    | Maintenance (deps, tooling, config)                   |
 | `refactor/` | Code changes that neither fix a bug nor add a feature |
-| `test/` | Adding or updating tests |
+| `test/`     | Adding or updating tests                              |
 
 Example: `feat/listbox-select`, `fix/table-rowindex`, `docs/tokens-guide`. Avoid parentheses and
 other shell metacharacters — git accepts them, but bash and zsh treat `(` as syntax, so
@@ -210,13 +216,13 @@ Documentation may use GitHub's five alert types as blockquote callouts (`> [!NOT
 vocabulary is fixed: each type maps to a **consequence for the reader**, not a mood. Pick the one
 whose consequence matches — writers don't choose by taste.
 
-| Callout | Use when skipping it… | In this repo, typically |
-|---|---|---|
-| `> [!NOTE]` | …costs nothing; background worth knowing | why an ADR exists, cross-links |
-| `> [!TIP]` | …means more work than necessary | shortcuts, `check:docs`-style helpers |
-| `> [!IMPORTANT]` | …the task at hand fails or is misunderstood | the recipe order, contract pointers |
-| `> [!WARNING]` | …hours are wasted debugging the wrong thing | gate failures that look like flakes |
-| `> [!CAUTION]` | …something **irreversible** happens | weakening a gate, history rewrites |
+| Callout          | Use when skipping it…                       | In this repo, typically               |
+| ---------------- | ------------------------------------------- | ------------------------------------- |
+| `> [!NOTE]`      | …costs nothing; background worth knowing    | why an ADR exists, cross-links        |
+| `> [!TIP]`       | …means more work than necessary             | shortcuts, `check:docs`-style helpers |
+| `> [!IMPORTANT]` | …the task at hand fails or is misunderstood | the recipe order, contract pointers   |
+| `> [!WARNING]`   | …hours are wasted debugging the wrong thing | gate failures that look like flakes   |
+| `> [!CAUTION]`   | …something **irreversible** happens         | weakening a gate, history rewrites    |
 
 Scarcity rules:
 
@@ -227,6 +233,6 @@ Scarcity rules:
 - Only the five exact types above, uppercase, on the first line of the blockquote —
   `check:docs` fails on anything else.
 
-Two honest limits: the *severity choice* is not machine-gateable (a reviewer judges whether
+Two honest limits: the _severity choice_ is not machine-gateable (a reviewer judges whether
 `[!WARNING]` was proportionate), and alerts render only on GitHub — in plain markdown viewers they
 degrade to an ordinary blockquote, so the text must read correctly without the highlight.

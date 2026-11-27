@@ -37,7 +37,11 @@ const check = (name, pass, detail) => results.push({ name, pass, detail });
 await wait(300);
 
 const root = doc.getElementById('root');
-check('example boots and mounts', Boolean(root && root.children.length > 0), `#root children=${root?.children.length ?? 0}`);
+check(
+  'example boots and mounts',
+  Boolean(root && root.children.length > 0),
+  `#root children=${root?.children.length ?? 0}`
+);
 
 const bodyRows = doc.querySelectorAll('tbody tr[role="row"]');
 check('watchlist renders', bodyRows.length >= 120, `body rows=${bodyRows.length}`);
@@ -46,10 +50,18 @@ const numericCells = doc.querySelectorAll('td .ui-cell--numeric, td.ui-cell--num
 check('numeric columns present', numericCells.length > 0, `numeric cells=${numericCells.length}`);
 
 const glyphs = doc.body.textContent.includes('▲') && doc.body.textContent.includes('▼');
-check('gain/loss glyphs rendered', glyphs, `up=${doc.body.textContent.includes('▲')}, down=${doc.body.textContent.includes('▼')}`);
+check(
+  'gain/loss glyphs rendered',
+  glyphs,
+  `up=${doc.body.textContent.includes('▲')}, down=${doc.body.textContent.includes('▼')}`
+);
 
 const grid = doc.querySelector('[role="grid"]');
-check('ARIA grid with row count', Boolean(grid) && grid.getAttribute('aria-rowcount') === '121', `aria-rowcount=${grid?.getAttribute('aria-rowcount')}`);
+check(
+  'ARIA grid with row count',
+  Boolean(grid) && grid.getAttribute('aria-rowcount') === '121',
+  `aria-rowcount=${grid?.getAttribute('aria-rowcount')}`
+);
 
 // interactions
 click(byText('button', 'Dark'));
@@ -62,7 +74,11 @@ check(
 
 click(byText('button', 'Light'));
 await wait();
-check('theme switch back to light', doc.documentElement.getAttribute('data-theme') === 'light', `data-theme=${doc.documentElement.getAttribute('data-theme')}`);
+check(
+  'theme switch back to light',
+  doc.documentElement.getAttribute('data-theme') === 'light',
+  `data-theme=${doc.documentElement.getAttribute('data-theme')}`
+);
 
 // tabs
 const tabs = doc.querySelectorAll('[role="tab"]');
@@ -75,11 +91,19 @@ check('tab click switches panel', selected === 2, `selectedIndex=${selected}`);
 click(bodyRows[0]);
 await wait();
 const dialog = doc.body.querySelector('[role="dialog"]');
-check('row click opens the order ticket', Boolean(dialog), `dialog present=${Boolean(dialog)}, title=${dialog?.querySelector('.ui-dialog__title')?.textContent ?? '-'}`);
+check(
+  'row click opens the order ticket',
+  Boolean(dialog),
+  `dialog present=${Boolean(dialog)}, title=${dialog?.querySelector('.ui-dialog__title')?.textContent ?? '-'}`
+);
 
 keydown(doc, 'Escape');
 await wait();
-check('Escape dismisses the ticket', !doc.body.querySelector('[role="dialog"]'), `still open=${Boolean(doc.body.querySelector('[role="dialog"]'))}`);
+check(
+  'Escape dismisses the ticket',
+  !doc.body.querySelector('[role="dialog"]'),
+  `still open=${Boolean(doc.body.querySelector('[role="dialog"]'))}`
+);
 
 const passed = results.filter((r) => r.pass).length;
 const report = {

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+packages/*/dist/
+apps/*/dist/
+harness/dist/
+verification/
+baselines/
+package-lock.json
+*.log

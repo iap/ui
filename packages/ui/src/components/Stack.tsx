@@ -31,13 +31,7 @@ export function Stack({
   children,
   ...rest
 }: StackProps) {
-  const cls = cx(
-    'ui-stack',
-    `ui-stack--${direction}`,
-    wrap && 'ui-stack--wrap',
-    grow && 'ui-stack--grow',
-    className
-  );
+  const cls = cx('ui-stack', `ui-stack--${direction}`, wrap && 'ui-stack--wrap', grow && 'ui-stack--grow', className);
   const merged: CSSProperties = { gap: `var(--ui-space-${gap})`, ...style };
   if (align) merged.alignItems = ALIGN[align];
   if (justify) merged.justifyContent = JUSTIFY[justify];

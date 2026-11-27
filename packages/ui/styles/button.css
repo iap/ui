@@ -20,35 +20,73 @@
 }
 
 /* sizes */
-.ui-btn--sm { font-size: var(--ui-font-size-sm); padding: calc(4px * var(--ui-density)) calc(12px * var(--ui-density)); }
-.ui-btn--md { font-size: var(--ui-font-size-md); padding: calc(8px * var(--ui-density)) calc(16px * var(--ui-density)); }
-.ui-btn--lg { font-size: var(--ui-font-size-lg); padding: calc(10px * var(--ui-density)) calc(20px * var(--ui-density)); }
+.ui-btn--sm {
+  font-size: var(--ui-font-size-sm);
+  padding: calc(4px * var(--ui-density)) calc(12px * var(--ui-density));
+}
+.ui-btn--md {
+  font-size: var(--ui-font-size-md);
+  padding: calc(8px * var(--ui-density)) calc(16px * var(--ui-density));
+}
+.ui-btn--lg {
+  font-size: var(--ui-font-size-lg);
+  padding: calc(10px * var(--ui-density)) calc(20px * var(--ui-density));
+}
 
 /* density overrides (token-backed, no runtime maths in JS) */
-.ui-btn--compact { --ui-density: var(--ui-density-compact); }
-.ui-btn--dense   { --ui-density: var(--ui-density-dense); }
+.ui-btn--compact {
+  --ui-density: var(--ui-density-compact);
+}
+.ui-btn--dense {
+  --ui-density: var(--ui-density-dense);
+}
 
-.ui-btn--full { width: 100%; }
+.ui-btn--full {
+  width: 100%;
+}
 
 /* variants */
-.ui-btn--primary   { background: var(--ui-primary);   color: var(--ui-on-primary); }
-.ui-btn--secondary { background: var(--ui-secondary); color: var(--ui-on-secondary); }
-.ui-btn--danger    { background: var(--ui-error);     color: var(--ui-on-error); }
+.ui-btn--primary {
+  background: var(--ui-primary);
+  color: var(--ui-on-primary);
+}
+.ui-btn--secondary {
+  background: var(--ui-secondary);
+  color: var(--ui-on-secondary);
+}
+.ui-btn--danger {
+  background: var(--ui-error);
+  color: var(--ui-on-error);
+}
 /* the secondary/outline button carries a real fill so it never dissolves into a white
    panel — transparent-on-white had no body and read as a label, not a control */
-.ui-btn--outline   { background: var(--ui-surface-1); color: var(--ui-primary); border-color: var(--ui-border-control); }
-.ui-btn--ghost     { background: transparent; color: var(--ui-on-surface); }
+.ui-btn--outline {
+  background: var(--ui-surface-1);
+  color: var(--ui-primary);
+  border-color: var(--ui-border-control);
+}
+.ui-btn--ghost {
+  background: transparent;
+  color: var(--ui-on-surface);
+}
 
 /* Pointer states are guarded: on a touch device `:hover` sticks after a tap and leaves the control
    looking pressed until something else is tapped. `:active` and `:focus-visible` stay unguarded —
    they are correct on every input type. */
 @media (hover: hover) {
-  .ui-btn:hover:not(:disabled) { filter: brightness(0.96); }
+  .ui-btn:hover:not(:disabled) {
+    filter: brightness(0.96);
+  }
   .ui-btn--outline:hover:not(:disabled),
-  .ui-btn--ghost:hover:not(:disabled) { background: var(--ui-hover-overlay); filter: none; }
+  .ui-btn--ghost:hover:not(:disabled) {
+    background: var(--ui-hover-overlay);
+    filter: none;
+  }
 }
 
-.ui-btn:active:not(:disabled) { filter: brightness(0.9); }
+.ui-btn:active:not(:disabled) {
+  filter: brightness(0.9);
+}
 
 /* Disabled is the QUIETEST state on the surface: flat grey fill, no border (the
    border is the active affordance), muted label. Two earlier cuts both failed the
@@ -64,4 +102,6 @@
   cursor: not-allowed;
 }
 
-.ui-btn--loading { cursor: progress; }
+.ui-btn--loading {
+  cursor: progress;
+}

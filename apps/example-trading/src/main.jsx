@@ -24,7 +24,7 @@ const SUFFIXES = ['', '.A', '.B', ''];
 function makeInstruments(n) {
   const out = new Array(n);
   let seed = 7;
-  const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
   for (let i = 0; i < n; i++) {
     const root = ROOT_SYMBOLS[i % ROOT_SYMBOLS.length];
     const suffix = SUFFIXES[Math.floor(i / ROOT_SYMBOLS.length) % SUFFIXES.length];
@@ -109,8 +109,7 @@ const TICKET_DEFAULTS = { side: 'buy', qty: '100', type: 'limit', tif: 'day', br
 
 /** Currency formatting. maximumFractionDigits is required: with only minimumFractionDigits set,
  *  Intl defaults the maximum to 3, which is how "411,235.742" reached the screen. */
-const money = (n) =>
-  n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /* ── shell pieces ──────────────────────────────────────────────────────────── */
 
@@ -134,9 +133,15 @@ function TopBar({ ticketOpen, onToggleTicket }) {
         Ticket
       </Button>
       <div className="top__themes">
-        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('light')}>Light</Button>
-        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('dark')}>Dark</Button>
-        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('high-contrast')}>Contrast</Button>
+        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('light')}>
+          Light
+        </Button>
+        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('dark')}>
+          Dark
+        </Button>
+        <Button variant="ghost" size="sm" density="dense" onClick={() => setTheme('high-contrast')}>
+          Contrast
+        </Button>
       </div>
     </header>
   );
@@ -149,12 +154,7 @@ function Rail() {
   return (
     <nav className="rail" aria-label="Workspace">
       {RAIL.map((label) => (
-        <button
-          key={label}
-          className="rail__item"
-          aria-current={current === label}
-          onClick={() => setCurrent(label)}
-        >
+        <button key={label} className="rail__item" aria-current={current === label} onClick={() => setCurrent(label)}>
           {label.slice(0, 4)}
         </button>
       ))}
@@ -233,7 +233,9 @@ function Watchlist({ instruments, onSelect, selected }) {
         width: 84,
         numeric: true,
         render: (r) => (
-          <Cell numeric tone={r.chgPct >= 0 ? 'positive' : 'negative'}>{r.chgPct.toFixed(2)}</Cell>
+          <Cell numeric tone={r.chgPct >= 0 ? 'positive' : 'negative'}>
+            {r.chgPct.toFixed(2)}
+          </Cell>
         )
       },
       { key: 'bid', header: 'Bid', width: 88, numeric: true, render: (r) => <Cell numeric>{r.bid.toFixed(2)}</Cell> },
@@ -250,7 +252,8 @@ function Watchlist({ instruments, onSelect, selected }) {
         header: 'Position',
         width: 96,
         numeric: true,
-        render: (r) => (r.pos === 0 ? <span className="muted num">—</span> : <Cell numeric>{r.pos.toLocaleString('en-US')}</Cell>)
+        render: (r) =>
+          r.pos === 0 ? <span className="muted num">—</span> : <Cell numeric>{r.pos.toLocaleString('en-US')}</Cell>
       },
       {
         key: 'pnl',
@@ -305,7 +308,7 @@ function Watchlist({ instruments, onSelect, selected }) {
 const FILLS = [
   ['09:31:04', 'AAPL', 'Buy', 400, 187.12, 'Filled'],
   ['09:33:51', 'NVDA', 'Sell', 250, 118.44, 'Filled'],
-  ['09:41:17', 'MSFT', 'Buy', 150, 411.90, 'Filled'],
+  ['09:41:17', 'MSFT', 'Buy', 150, 411.9, 'Filled'],
   ['10:02:38', 'TSLA', 'Sell', 300, 242.05, 'Partial'],
   ['10:18:02', 'ES', 'Buy', 2, 5410.25, 'Working']
 ];
@@ -419,7 +422,13 @@ function Ticket({ instrument, open }) {
       </div>
 
       <Field label="Limit price" error={priceError ? 'Enter a price above 0.00' : undefined}>
-        <Input density="dense" numeric value={price} onChange={(e) => setPrice(e.target.value)} disabled={type !== 'limit'} />
+        <Input
+          density="dense"
+          numeric
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          disabled={type !== 'limit'}
+        />
       </Field>
 
       <div className="ticket__row">
@@ -437,7 +446,12 @@ function Ticket({ instrument, open }) {
         />
       </div>
 
-      <Checkbox density="dense" label="Bracket with stop" checked={bracket} onChange={(e) => setBracket(e.target.checked)} />
+      <Checkbox
+        density="dense"
+        label="Bracket with stop"
+        checked={bracket}
+        onChange={(e) => setBracket(e.target.checked)}
+      />
 
       <div className="ticket__summary">
         <div className="ticket__line">
@@ -493,7 +507,9 @@ function StatusBar({ count }) {
       <span>Data delayed 15 min</span>
       <span className="status__spacer" />
       <span className="num">{count.toLocaleString('en-US')} rows</span>
-      <span className="num">rendered {Math.min(count, 46)} of {count.toLocaleString('en-US')}</span>
+      <span className="num">
+        rendered {Math.min(count, 46)} of {count.toLocaleString('en-US')}
+      </span>
     </footer>
   );
 }
@@ -510,10 +526,7 @@ function Workspace() {
 
   // Positions are a fixed slice of the book and a tick never adds or removes one, so the per-frame
   // totals walk the positioned rows only (about a seventh) rather than all 5,000.
-  const positionIndexes = useMemo(
-    () => seedBook.flatMap((row, index) => (row.pos === 0 ? [] : [index])),
-    [seedBook]
-  );
+  const positionIndexes = useMemo(() => seedBook.flatMap((row, index) => (row.pos === 0 ? [] : [index])), [seedBook]);
 
   const totals = useMemo(() => {
     let pnl = 0;

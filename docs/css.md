@@ -9,19 +9,19 @@ values, [verification.md](verification.md) for the gate wiring.
 
 One hand-written file per area in `packages/ui/styles/` (11 files, ~444 lines total):
 
-| File | Covers |
-|---|---|
-| `base.css` | reset, `.ui-root` typography/colours, the motion kill-switch, global `:focus-visible` ring, `.ui-visually-hidden` |
-| `layout.css` | `.ui-stack` modifiers, `.ui-divider` |
-| `button.css` | `.ui-btn` sizes, densities, 5 variants |
-| `forms.css` | `.ui-field*`, `.ui-input`, `.ui-select`, `.ui-check`, `.ui-switch` |
-| `table.css` | `.ui-table-wrap`, sticky thead, zebra rows, cell tones |
-| `tabs.css` | tab list, `[aria-selected='true']` state, panel |
-| `feedback.css` | `.ui-banner` tones, `.ui-toast(-region)` |
-| `dialog.css` | scrim, dialog frame, header/body/footer |
-| `menu.css` | `.ui-menu*` panel, items, separators |
-| `popover.css` | `.ui-popover` non-modal anchored panel |
-| `tooltip.css` | `.ui-tooltip` (no transition, by law) |
+| File           | Covers                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `base.css`     | reset, `.ui-root` typography/colours, the motion kill-switch, global `:focus-visible` ring, `.ui-visually-hidden` |
+| `layout.css`   | `.ui-stack` modifiers, `.ui-divider`                                                                              |
+| `button.css`   | `.ui-btn` sizes, densities, 5 variants                                                                            |
+| `forms.css`    | `.ui-field*`, `.ui-input`, `.ui-select`, `.ui-check`, `.ui-switch`                                                |
+| `table.css`    | `.ui-table-wrap`, sticky thead, zebra rows, cell tones                                                            |
+| `tabs.css`     | tab list, `[aria-selected='true']` state, panel                                                                   |
+| `feedback.css` | `.ui-banner` tones, `.ui-toast(-region)`                                                                          |
+| `dialog.css`   | scrim, dialog frame, header/body/footer                                                                           |
+| `menu.css`     | `.ui-menu*` panel, items, separators                                                                              |
+| `popover.css`  | `.ui-popover` non-modal anchored panel                                                                            |
+| `tooltip.css`  | `.ui-tooltip` (no transition, by law)                                                                             |
 
 ## The build
 
@@ -49,9 +49,10 @@ generated output is excluded), plus one suite-level check that keeps the prefix 
    it follows the document language's directionality rather than the CSS `direction` property — so a
    direction set only in CSS is outside the contract and no selector can observe it. The exception to
    "RTL flips for free" is a value with no logical equivalent: the tooltip pairs `inset-inline-start`
-   with a *physical* centring transform, so the transform must flip with the direction, and it does so
+   with a _physical_ centring transform, so the transform must flip with the direction, and it does so
    via `.ui-tooltip:dir(rtl)` — matched on the element, so an `ltr` island inside an `rtl` document
    keeps ltr geometry.
+
 3. **z-index only via `var(--ui-z-*)`** — the stacking order is a tokened ladder
    (dropdown 1000 → toast 1070).
 4. **box-shadow only via `var(--ui-elevation-*)`** — elevation is a scale, not a local decision.
@@ -82,10 +83,16 @@ Density is a CSS custom property multiplier, resolved entirely in the stylesheet
 no runtime maths in JS":
 
 ```css
-.ui-btn--compact { --ui-density: var(--ui-density-compact); }  /* 0.75 */
-.ui-btn--dense   { --ui-density: var(--ui-density-dense);  }   /* 0.625 */
+.ui-btn--compact {
+  --ui-density: var(--ui-density-compact);
+} /* 0.75 */
+.ui-btn--dense {
+  --ui-density: var(--ui-density-dense);
+} /* 0.625 */
 
-.ui-btn--sm { padding: calc(4px * var(--ui-density)) calc(12px * var(--ui-density)); }
+.ui-btn--sm {
+  padding: calc(4px * var(--ui-density)) calc(12px * var(--ui-density));
+}
 ```
 
 Root default is `--ui-density: 1` (comfortable). Components emit the modifier class only for
@@ -97,5 +104,5 @@ non-comfortable densities, and `calc(<px> * var(--ui-density))` does the rest �
 ADR-004: **motion does not exist** in v1. The motion tokens (`short 100ms / medium 200ms / long
 300ms`) are authored in `tokens.json` but inert — `motion.enabled: false` emits
 `--ui-transition: none`, check 5 above bans any other value, and `base.css` kill-switches the
-whole tree. Reduced-motion preferences are satisfied *by construction*, not by a media query. A
+whole tree. Reduced-motion preferences are satisfied _by construction_, not by a media query. A
 future opt-in entrypoint can use the tokens without breaking a single component.

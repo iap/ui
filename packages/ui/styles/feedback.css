@@ -14,16 +14,32 @@
   font-size: var(--ui-font-size-md);
 }
 
-.ui-banner__title { font-weight: 600; }
-.ui-banner__body { color: var(--ui-on-surface-muted); }
+.ui-banner__title {
+  font-weight: 600;
+}
+.ui-banner__body {
+  color: var(--ui-on-surface-muted);
+}
 
-.ui-banner--info    { border-inline-start: 3px solid var(--ui-info); }
-.ui-banner--success { border-inline-start: 3px solid var(--ui-positive); }
-.ui-banner--warning { border-inline-start: 3px solid var(--ui-warning); }
-.ui-banner--danger  { border-inline-start: 3px solid var(--ui-negative); }
+.ui-banner--info {
+  border-inline-start: 3px solid var(--ui-info);
+}
+.ui-banner--success {
+  border-inline-start: 3px solid var(--ui-positive);
+}
+.ui-banner--warning {
+  border-inline-start: 3px solid var(--ui-warning);
+}
+.ui-banner--danger {
+  border-inline-start: 3px solid var(--ui-negative);
+}
 
-.ui-banner--danger .ui-banner__title  { color: var(--ui-negative); }
-.ui-banner--success .ui-banner__title { color: var(--ui-positive); }
+.ui-banner--danger .ui-banner__title {
+  color: var(--ui-negative);
+}
+.ui-banner--success .ui-banner__title {
+  color: var(--ui-positive);
+}
 
 .ui-toast-region {
   position: fixed;

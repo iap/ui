@@ -23,11 +23,11 @@ the pipeline:
 primitive -> theme role -> component
 ```
 
-| Tier | What it is | Emitted as | Example |
-|---|---|---|---|
-| **primitive** | raw values we own | `--ui-ref-*` | `--ui-ref-indigo-500: #3f51b5` |
-| **theme role** | a role mapped to a primitive *by reference* | `--ui-<role>` | `--ui-primary: var(--ui-ref-indigo-500)` |
-| **structural** | theme-less scale values | `--ui-space-*`, `--ui-font-*`, … | `--ui-space-3: 12px` |
+| Tier           | What it is                                  | Emitted as                       | Example                                  |
+| -------------- | ------------------------------------------- | -------------------------------- | ---------------------------------------- |
+| **primitive**  | raw values we own                           | `--ui-ref-*`                     | `--ui-ref-indigo-500: #3f51b5`           |
+| **theme role** | a role mapped to a primitive _by reference_ | `--ui-<role>`                    | `--ui-primary: var(--ui-ref-indigo-500)` |
+| **structural** | theme-less scale values                     | `--ui-space-*`, `--ui-font-*`, … | `--ui-space-3: 12px`                     |
 
 Roles referencing primitives — never literals — is what makes retheming a one-line change:
 override a single `--ui-ref-*` and every role that points at it follows.
@@ -75,7 +75,7 @@ zero literal roles.
 
 ## The contrast contract
 
-`scripts/check-contrast.mjs` enforces WCAG on the token *relationships*, theme by theme — not on
+`scripts/check-contrast.mjs` enforces WCAG on the token _relationships_, theme by theme — not on
 rendered pages, so unrendered states are covered too:
 
 - **4.5:1** (WCAG 1.4.3 AA) for text roles: `onSurface`/`onSurfaceMuted` on each surface tier,
@@ -85,15 +85,15 @@ rendered pages, so unrendered states are covered too:
   `borderControl` on `surface`/`surface-1`/`background`.
 
 That is 23 pair definitions × 3 fully-resolvable themes = **69 evaluations**, all passing. The
-failure message says it all: *"Fix the token mapping, not the test."*
+failure message says it all: _"Fix the token mapping, not the test."_
 
 When you add a foreground/background combination to a component, add its pair to `PAIRS` in the
 same change (AGENTS.md § Rule zero).
 
 ## Adding or changing a value
 
-1. New visual value → `tokens.json` first. A new **role** goes into *all three themes in the same
-   change*, each as `{primitive.reference}` — never a literal.
+1. New visual value → `tokens.json` first. A new **role** goes into _all three themes in the same
+   change_, each as `{primitive.reference}` — never a literal.
 2. Rebuild: `npm run build` (runs `build-tokens.mjs`, which fails on dangling references or
    role-set divergence).
 3. `npm run check:contrast` — the new mapping must clear WCAG.

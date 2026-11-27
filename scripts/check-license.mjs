@@ -33,7 +33,11 @@ const rootPkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 
 // ---- 1. licence files exist and agree ----
 for (const file of LICENCE_FILES) {
-  check(`licence file present: ${file}`, existsSync(resolve(root, file)), existsSync(resolve(root, file)) ? 'ok' : 'MISSING');
+  check(
+    `licence file present: ${file}`,
+    existsSync(resolve(root, file)),
+    existsSync(resolve(root, file)) ? 'ok' : 'MISSING'
+  );
 }
 check('LICENSE names the dual licence', readFileSync(resolve(root, 'LICENSE'), 'utf8').includes(LICENSE), LICENSE);
 
@@ -52,7 +56,11 @@ const manifests = [root, ...workspaceDirs];
 for (const dir of manifests) {
   const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
   const label = relative(root, dir) || '.';
-  check(`${label}/package.json declares "${LICENSE}"`, pkg.license === LICENSE, `license = ${JSON.stringify(pkg.license)}`);
+  check(
+    `${label}/package.json declares "${LICENSE}"`,
+    pkg.license === LICENSE,
+    `license = ${JSON.stringify(pkg.license)}`
+  );
 }
 
 // ---- 3. every source file carries the full SPDX header ----
@@ -67,7 +75,8 @@ const walk = (dir) => {
     else if (SOURCE_EXT.has(extname(full))) sourceFiles.push(full);
   }
 };
-for (const dir of ['scripts', 'tests', 'packages/ui/src', 'packages/ui/styles', 'harness/src', 'apps']) walk(resolve(root, dir));
+for (const dir of ['scripts', 'tests', 'packages/ui/src', 'packages/ui/styles', 'harness/src', 'apps'])
+  walk(resolve(root, dir));
 for (const file of ['packages/tokens/build-tokens.mjs', 'packages/ui/build.mjs']) {
   if (existsSync(resolve(root, file))) sourceFiles.push(resolve(root, file));
 }
@@ -84,7 +93,12 @@ const badHeader = sourceFiles.filter((file) => {
 check(
   `every source file opens with the exact SPDX identifier (${sourceFiles.length} files)`,
   badHeader.length === 0,
-  badHeader.length ? `bad: ${badHeader.slice(0, 5).map((f) => relative(root, f)).join(', ')}` : 'clean'
+  badHeader.length
+    ? `bad: ${badHeader
+        .slice(0, 5)
+        .map((f) => relative(root, f))
+        .join(', ')}`
+    : 'clean'
 );
 
 // ---- 4. publishable packages ship the terms ----
@@ -94,10 +108,16 @@ for (const dir of workspaceDirs) {
   const files = pkg.files ?? [];
   const missing = LICENCE_FILES.filter((f) => !files.includes(f));
   const label = relative(root, dir);
-  check(`${label} publishes the licence files`, missing.length === 0, missing.length ? `files missing: ${missing.join(', ')}` : 'ok');
+  check(
+    `${label} publishes the licence files`,
+    missing.length === 0,
+    missing.length ? `files missing: ${missing.join(', ')}` : 'ok'
+  );
 }
 
 const passed = checks.filter((c) => c.pass).length;
-console.log(`licence contract: ${passed}/${checks.length} checks passed (${sourceFiles.length} source files, ${manifests.length} manifests)`);
+console.log(
+  `licence contract: ${passed}/${checks.length} checks passed (${sourceFiles.length} source files, ${manifests.length} manifests)`
+);
 for (const c of checks) console.log(`  ${c.pass ? 'PASS' : 'FAIL'}  ${c.name}${c.pass ? '' : ' -> ' + c.detail}`);
 process.exit(passed === checks.length ? 0 : 1);

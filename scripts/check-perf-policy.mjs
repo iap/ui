@@ -86,8 +86,16 @@ const retry = (r, { engineName = 'webkit', hostOverloaded = false } = {}) =>
 eq('throttled readings retry', retry({ p95: 150 }), true);
 eq('a marginal gated reading retries', retry({ p95: 26 }), true);
 eq('a clearly over-budget gated reading does NOT retry without overload', retry({ p95: 40 }), false);
-eq('a clearly over-budget gated reading retries on an overloaded host', retry({ p95: 40 }, { hostOverloaded: true }), true);
-eq('an overloaded host does not rescue an informational engine', retry({ p95: 40 }, { engineName: 'chromium', hostOverloaded: true }), false);
+eq(
+  'a clearly over-budget gated reading retries on an overloaded host',
+  retry({ p95: 40 }, { hostOverloaded: true }),
+  true
+);
+eq(
+  'an overloaded host does not rescue an informational engine',
+  retry({ p95: 40 }, { engineName: 'chromium', hostOverloaded: true }),
+  false
+);
 eq('a clean reading never retries', retry({ p95: 16.7 }), false);
 
 // --- 5b. the cadence-lock starvation signature: healthy paint, ticking locked to 2x the frame
@@ -95,10 +103,18 @@ eq('a clean reading never retries', retry({ p95: 16.7 }), false);
 eq('a 30 Hz-locked ticking reading is recognised (33.3 ms)', looksCadenceLocked(reading({ p95: 33.3 })), true);
 eq('the lock window covers 2 frames +/- tolerance (34 ms is inside)', looksCadenceLocked(reading({ p95: 34 })), true);
 eq('a 2.4-frame reading is not a lock (40 ms)', looksCadenceLocked(reading({ p95: 40 })), false);
-eq('a lock needs healthy paint (static over budget is not a lock)', looksCadenceLocked(reading({ p95: 33.3, staticP95: 30 })), false);
+eq(
+  'a lock needs healthy paint (static over budget is not a lock)',
+  looksCadenceLocked(reading({ p95: 33.3, staticP95: 30 })),
+  false
+);
 eq('a missing ticking reading is not a lock', looksCadenceLocked({ p95: Number.NaN, staticP95: 16.8 }), false);
 eq('a cadence-locked gated reading retries', retry({ p95: 33.3 }), true);
-eq('a cadence-locked reading does not rescue an informational engine', retry({ p95: 33.3 }, { engineName: 'chromium' }), false);
+eq(
+  'a cadence-locked reading does not rescue an informational engine',
+  retry({ p95: 33.3 }, { engineName: 'chromium' }),
+  false
+);
 eq('a cadence-locked reading is not a suite-wide overload signal', overload(reading({ p95: 33.3 })), false);
 eq('the frame interval is a 60 Hz frame', Math.round(FRAME_MS * 100) / 100, 16.67);
 eq('the cadence tolerance is pinned at 2.5 ms', CADENCE_TOLERANCE_MS, 2.5);
@@ -119,16 +135,36 @@ const suite = readFileSync(resolve(root, 'scripts/browser-suite.mjs'), 'utf8');
 // The budget the verdicts ENFORCE must be the budget the report DECLARES. Pinning only the
 // declaration let a doubled context budget pass every check (Greptile P2 on #33), so the suite
 // now writes both from the module and this asserts the passthrough.
-check('browser-suite writes its budget from the module', /maxP95FrameMs: MAX_P95_FRAME_MS/.test(suite), 'maxP95FrameMs: MAX_P95_FRAME_MS');
-check('browser-suite builds its context through the module', /perfContext\(process\.platform, engine\.name\)/.test(suite), 'perfContext(process.platform, engine.name)');
+check(
+  'browser-suite writes its budget from the module',
+  /maxP95FrameMs: MAX_P95_FRAME_MS/.test(suite),
+  'maxP95FrameMs: MAX_P95_FRAME_MS'
+);
+check(
+  'browser-suite builds its context through the module',
+  /perfContext\(process\.platform, engine\.name\)/.test(suite),
+  'perfContext(process.platform, engine.name)'
+);
 check('browser-suite declares no budget of its own', !/budgetMs/.test(suite), 'no budgetMs in the suite');
 eq('the module budget is 25 ms', MAX_P95_FRAME_MS, BUDGET);
 eq('the module slack is 5 ms', MARGINAL_SLACK_MS, SLACK);
-eq('the module overload knobs are 0.25 / 40', HOST_OVERLOAD.droppedRatio + '/' + HOST_OVERLOAD.staticP95Ms, OVERLOAD.droppedRatio + '/' + OVERLOAD.staticP95Ms);
+eq(
+  'the module overload knobs are 0.25 / 40',
+  HOST_OVERLOAD.droppedRatio + '/' + HOST_OVERLOAD.staticP95Ms,
+  OVERLOAD.droppedRatio + '/' + OVERLOAD.staticP95Ms
+);
 eq('perfContext carries the module budget', perfContext('darwin', 'webkit').budgetMs, MAX_P95_FRAME_MS);
 eq('perfContext carries the module slack', perfContext('darwin', 'webkit').slackMs, MARGINAL_SLACK_MS);
-check('browser-suite imports the perf policy module', /from\s+['"]\.\/perf-policy\.mjs['"]/.test(suite), "import from './perf-policy.mjs'");
-check('browser-suite routes the retry decision through needsRetry', /needsRetry\(reading/.test(suite), 'needsRetry(reading, ...) call');
+check(
+  'browser-suite imports the perf policy module',
+  /from\s+['"]\.\/perf-policy\.mjs['"]/.test(suite),
+  "import from './perf-policy.mjs'"
+);
+check(
+  'browser-suite routes the retry decision through needsRetry',
+  /needsRetry\(reading/.test(suite),
+  'needsRetry(reading, ...) call'
+);
 check(
   'browser-suite does not re-derive the retry decision inline',
   !/looksThrottled\(reading\)\s*\|\|/.test(suite),
@@ -148,8 +184,16 @@ eq('ticking verdict: 26 ms fails', tickingWithinBudget(reading({ p95: 26 }), ver
 eq('ticking verdict: 35 ms fails', tickingWithinBudget(reading({ p95: 35 }), verdictCtx), false);
 eq('static verdict: 25 ms passes', staticWithinBudget(reading({ staticP95: 25 }), verdictCtx), true);
 eq('static verdict: 26 ms fails', staticWithinBudget(reading({ staticP95: 26 }), verdictCtx), false);
-eq('ticking verdict is informational on an un-gated engine', tickingWithinBudget(reading({ p95: 900 }), darwin('chromium')), true);
-eq('static verdict is informational on an un-gated engine', staticWithinBudget(reading({ staticP95: 900 }), darwin('chromium')), true);
+eq(
+  'ticking verdict is informational on an un-gated engine',
+  tickingWithinBudget(reading({ p95: 900 }), darwin('chromium')),
+  true
+);
+eq(
+  'static verdict is informational on an un-gated engine',
+  staticWithinBudget(reading({ staticP95: 900 }), darwin('chromium')),
+  true
+);
 
 // --- 10. looksThrottled's static half (the ceiling and the finite guard) ---
 eq('a throttled static reading is throttled (staticP95 101)', looksThrottled(reading({ staticP95: 101 })), true);
@@ -162,16 +206,43 @@ eq('a missing static reading is throttled', looksThrottled({ p95: 16.7 }), true)
 // --- 12. single source of truth: the suite's verdicts must run through this module, and no
 //         predicate may be re-derived locally (the earlier text guard only caught the exact
 //         `looksThrottled(reading) ||` spelling, so an inline copy under another name slipped past). ---
-check('browser-suite gates ticking through the module', /tickingWithinBudget\(m, policyContext\(engine\)\)/.test(suite), 'tickingWithinBudget(...) call');
-check('browser-suite gates static through the module', /staticWithinBudget\(m, policyContext\(engine\)\)/.test(suite), 'staticWithinBudget(...) call');
+check(
+  'browser-suite gates ticking through the module',
+  /tickingWithinBudget\(m, policyContext\(engine\)\)/.test(suite),
+  'tickingWithinBudget(...) call'
+);
+check(
+  'browser-suite gates static through the module',
+  /staticWithinBudget\(m, policyContext\(engine\)\)/.test(suite),
+  'staticWithinBudget(...) call'
+);
 check(
   'browser-suite never compares the perf budget inline',
   !/[<>]=?\s*T\.maxP95FrameMs/.test(suite),
   'no comparison against T.maxP95FrameMs outside perf-policy.mjs (interpolation and passthrough are fine)'
 );
-check('browser-suite passes the host-overload state in', /hostOverloaded: hostOverloaded\(\)/.test(suite), 'hostOverloaded() at the call site');
-for (const name of ['looksThrottled', 'perfGated', 'overPerfBudget', 'marginalPerfOverBudget', 'isBetterReading', 'isOverloadSignal', 'needsRetry', 'looksCadenceLocked', 'tickingWithinBudget', 'staticWithinBudget']) {
-  check(`browser-suite does not redefine ${name}`, !new RegExp(`(?:const|let|var|function)\\s+${name}\\b`).test(suite), 'no local definition');
+check(
+  'browser-suite passes the host-overload state in',
+  /hostOverloaded: hostOverloaded\(\)/.test(suite),
+  'hostOverloaded() at the call site'
+);
+for (const name of [
+  'looksThrottled',
+  'perfGated',
+  'overPerfBudget',
+  'marginalPerfOverBudget',
+  'isBetterReading',
+  'isOverloadSignal',
+  'needsRetry',
+  'looksCadenceLocked',
+  'tickingWithinBudget',
+  'staticWithinBudget'
+]) {
+  check(
+    `browser-suite does not redefine ${name}`,
+    !new RegExp(`(?:const|let|var|function)\\s+${name}\\b`).test(suite),
+    'no local definition'
+  );
 }
 
 const passed = checks.filter((c) => c.pass).length;

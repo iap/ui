@@ -79,7 +79,11 @@ test('a re-measure is triggered for throttled, marginal, or overloaded-host read
 
   const overloaded = { ...perfContext('linux', 'chromium'), hostOverloaded: true };
   assert.equal(needsRetry({ p95: 40, staticP95: 20 }, overloaded), true, 'over budget while the host is thrashing');
-  assert.equal(needsRetry({ p95: 40, staticP95: 20 }, ctx), false, 'over budget but the host looks healthy -> fail honestly');
+  assert.equal(
+    needsRetry({ p95: 40, staticP95: 20 }, ctx),
+    false,
+    'over budget but the host looks healthy -> fail honestly'
+  );
 });
 
 test('a cadence lock is healthy paint plus a 30 Hz-locked ticking reading', () => {
@@ -97,7 +101,11 @@ test('a cadence lock retries per combination without latching the suite as overl
   assert.equal(needsRetry({ p95: 33.3, staticP95: 16.8 }, gated), true, 'a starved, gated reading is re-measured');
   assert.equal(needsRetry({ p95: 33.3, staticP95: 16.8 }, informational), false, 'informational engines do not retry');
   // Latching would lengthen every later combination; the lock is handled per combination instead.
-  assert.equal(isOverloadSignal({ p95: 33.3, staticP95: 16.8, droppedRatio: 0 }, { droppedRatio: 0.25, staticP95Ms: 40 }), false, 'a lock is not a suite-wide overload signal');
+  assert.equal(
+    isOverloadSignal({ p95: 33.3, staticP95: 16.8, droppedRatio: 0 }, { droppedRatio: 0.25, staticP95Ms: 40 }),
+    false,
+    'a lock is not a suite-wide overload signal'
+  );
 });
 
 test('a persistent cadence lock still fails (the retry cannot mask a regression)', () => {
@@ -109,14 +117,26 @@ test('a persistent cadence lock still fails (the retry cannot mask a regression)
 
 test('isBetterReading prefers an unthrottled, in-budget attempt', () => {
   const ctx = perfContext('linux', 'chromium');
-  assert.equal(isBetterReading({ p95: 150, staticP95: 20 }, { p95: 20, staticP95: 20 }, ctx), true, 'unthrottled beats throttled');
-  assert.equal(isBetterReading({ p95: 20, staticP95: 20 }, { p95: 150, staticP95: 20 }, ctx), false, 'throttled never beats unthrottled');
+  assert.equal(
+    isBetterReading({ p95: 150, staticP95: 20 }, { p95: 20, staticP95: 20 }, ctx),
+    true,
+    'unthrottled beats throttled'
+  );
+  assert.equal(
+    isBetterReading({ p95: 20, staticP95: 20 }, { p95: 150, staticP95: 20 }, ctx),
+    false,
+    'throttled never beats unthrottled'
+  );
 
   // The other replacement path: neither reading is throttled, but one is over budget on a gated
   // engine, so the in-budget retry must win - otherwise a failing reading is kept.
   const overBudget = { p95: 26, staticP95: 20 };
   const inBudget = { p95: 20, staticP95: 20 };
-  assert.equal(isBetterReading(overBudget, inBudget, ctx), true, 'a gated engine replaces an over-budget reading with an in-budget retry');
+  assert.equal(
+    isBetterReading(overBudget, inBudget, ctx),
+    true,
+    'a gated engine replaces an over-budget reading with an in-budget retry'
+  );
   assert.equal(
     isBetterReading(overBudget, inBudget, perfContext('linux', 'webkit')),
     false,

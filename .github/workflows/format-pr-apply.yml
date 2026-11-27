@@ -1,0 +1,117 @@
+name: Format PR (apply patch)
+
+# Privileged half: runs in the base repo context after the untrusted patch workflow
+# completes. It never executes PR code: git fetch/switch treat the PR head as data,
+# and only a validated text patch is applied. PR identity comes from the trusted
+# workflow_run payload, never from the artifact. A fork branch cannot be pushed to
+# with this token, so the result goes to a base-repo branch linked back to the PR.
+on:
+  workflow_run:
+    workflows: ['Format PR (produce patch)']
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: apply validated patch
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Default ref on workflow_run is the base default branch: trusted code only.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download the patch artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: gh run download "$RUN_ID" -n format-patch --dir "$RUNNER_TEMP/format-patch"
+      - name: Resolve PR from trusted run metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          RUN_PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          EXPECTED_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        run: |
+          set -euo pipefail
+          [ "$RUN_EVENT" = pull_request ] || { echo "unexpected triggering event"; exit 1; }
+          case "$RUN_HEAD_SHA" in ''|*[!0-9a-f]*) echo "invalid run head sha"; exit 1;; esac
+          # Old artifacts carried PR identity inside the artifact itself: refuse them.
+          if [ -e "$RUNNER_TEMP/format-patch/pr_number" ] || [ -e "$RUNNER_TEMP/format-patch/head_sha" ]; then
+            echo "artifact must not carry PR identity"; exit 1
+          fi
+          CHANGES=$(cat "$RUNNER_TEMP/format-patch/has_changes")
+          case "$CHANGES" in yes|no) ;; *) echo "invalid no-change signal"; exit 1;; esac
+          PR="$RUN_PR_NUMBER"
+          if [ -z "$PR" ]; then
+            PR=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" \
+              --jq ".[] | select(.head.sha == \"$RUN_HEAD_SHA\") | .number" | head -n 1)
+          fi
+          case "$PR" in ''|*[!0-9]*) echo "could not resolve a PR for this run"; exit 1;; esac
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}" > "$RUNNER_TEMP/pr.json"
+          node - "$RUNNER_TEMP/pr.json" <<'NODE'
+          const fs = require('fs');
+          const pr = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (pr.state !== 'open') throw new Error('PR is not open');
+          if (!pr.labels.some((label) => label.name === 'format:apply')) throw new Error('format:apply label missing');
+          if (pr.head.sha !== process.env.EXPECTED_SHA) throw new Error('PR head does not match the run head');
+          if (process.env.EXPECTED_REPO && pr.head.repo.full_name !== process.env.EXPECTED_REPO) {
+            throw new Error('PR head repository does not match the run');
+          }
+          NODE
+          printf '%s\n' "$PR" > "$RUNNER_TEMP/pr_number"
+          printf '%s\n' "$CHANGES" > "$RUNNER_TEMP/has_changes"
+      - name: Finish early when the PR is already formatted
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "$(cat "$RUNNER_TEMP/has_changes")" = no ]; then
+            PR=$(cat "$RUNNER_TEMP/pr_number")
+            gh pr comment "$PR" --body 'Prettier found nothing to format; no patch was produced.'
+            echo "no changes — nothing to apply"
+            exit 0
+          fi
+          echo "formatting changes present"
+      - name: Validate the patch against the gate
+        run: node scripts/check-format-patch.mjs "$RUNNER_TEMP/format-patch/format.patch"
+      - name: Apply, commit and link back
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          PR=$(cat "$RUNNER_TEMP/pr_number")
+          BRANCH="format/pr-${PR}-${RUN_ID}"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          # The producer diffed against this same PR head. Fetching and switching
+          # treats fork code as data; nothing from it is installed or executed.
+          git fetch origin "refs/pull/${PR}/head"
+          ACTUAL_SHA=$(git rev-parse FETCH_HEAD)
+          [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ] || { echo "PR head moved after verification; refusing to apply"; exit 1; }
+          git switch --detach FETCH_HEAD
+          git switch -c "$BRANCH"
+          git apply --check "$RUNNER_TEMP/format-patch/format.patch"
+          git apply "$RUNNER_TEMP/format-patch/format.patch"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Patch was already applied; nothing to commit"
+            exit 0
+          fi
+          git add -A
+          git commit -m "chore: format PR #$PR"
+          git push origin "$BRANCH"
+          COMPARE="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?quick_pull=1&title=chore%3A%20format%20PR%20%23${PR}"
+          gh pr comment "$PR" --body "Prettier produced a formatting-only patch on top of this PR's head, pushed to \`$BRANCH\`. [Open it as a PR]($COMPARE), or cherry-pick the branch. No workflows, lockfiles, generated files or mode changes are included."

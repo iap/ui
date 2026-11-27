@@ -46,17 +46,91 @@ const SCOPES = {
 };
 
 const FEATURES = [
-  { name: ':focus-visible', pattern: /:focus-visible/, scope: 'library', setsFloor: true, chrome: 86, firefox: 85, safari: '15.4' },
+  {
+    name: ':focus-visible',
+    pattern: /:focus-visible/,
+    scope: 'library',
+    setsFloor: true,
+    chrome: 86,
+    firefox: 85,
+    safari: '15.4'
+  },
   { name: 'dvh', pattern: /[0-9]dvh\b/, scope: 'library', setsFloor: false, chrome: 108, firefox: 101, safari: '15.4' },
-  { name: 'accent-color', pattern: /accent-color\s*:/, scope: 'library', setsFloor: false, chrome: 93, firefox: 92, safari: '15.4' },
+  {
+    name: 'accent-color',
+    pattern: /accent-color\s*:/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 93,
+    firefox: 92,
+    safari: '15.4'
+  },
   { name: ':dir()', pattern: /:dir\(/, scope: 'library', setsFloor: false, chrome: 120, firefox: 49, safari: '16.4' },
-  { name: 'inset-inline', pattern: /inset-inline|padding-block|margin-inline|inline-start|inline-end|border-inline/, scope: 'library', setsFloor: false, chrome: 87, firefox: 63, safari: '14.1' },
-  { name: 'flex gap', doc: 'flex `gap`', pattern: /[^-]gap\s*:/, scope: 'library', setsFloor: false, chrome: 57, firefox: 52, safari: '10.1' },
-  { name: '@supports selector()', pattern: /@supports[^{]*selector\(/, scope: 'library', setsFloor: false, chrome: 83, firefox: 69, safari: '14.1' },
-  { name: 'position: sticky', pattern: /position\s*:\s*sticky/, scope: 'library', setsFloor: false, chrome: 56, firefox: 32, safari: '13' },
-  { name: 'text-size-adjust', pattern: /text-size-adjust\s*:/, scope: 'library', setsFloor: false, chrome: 54, firefox: null, safari: null },
-  { name: 'optional chaining / nullish coalescing', doc: 'optional chaining, nullish coalescing', pattern: /\?\.|\?\?/, scope: 'source', setsFloor: false, chrome: 80, firefox: 74, safari: '13.1' },
-  { name: 'scrollbar-width', pattern: /scrollbar-width\s*:/, scope: 'example', setsFloor: false, chrome: 121, firefox: 64, safari: '18.2' }
+  {
+    name: 'inset-inline',
+    pattern: /inset-inline|padding-block|margin-inline|inline-start|inline-end|border-inline/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 87,
+    firefox: 63,
+    safari: '14.1'
+  },
+  {
+    name: 'flex gap',
+    doc: 'flex `gap`',
+    pattern: /[^-]gap\s*:/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 57,
+    firefox: 52,
+    safari: '10.1'
+  },
+  {
+    name: '@supports selector()',
+    pattern: /@supports[^{]*selector\(/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 83,
+    firefox: 69,
+    safari: '14.1'
+  },
+  {
+    name: 'position: sticky',
+    pattern: /position\s*:\s*sticky/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 56,
+    firefox: 32,
+    safari: '13'
+  },
+  {
+    name: 'text-size-adjust',
+    pattern: /text-size-adjust\s*:/,
+    scope: 'library',
+    setsFloor: false,
+    chrome: 54,
+    firefox: null,
+    safari: null
+  },
+  {
+    name: 'optional chaining / nullish coalescing',
+    doc: 'optional chaining, nullish coalescing',
+    pattern: /\?\.|\?\?/,
+    scope: 'source',
+    setsFloor: false,
+    chrome: 80,
+    firefox: 74,
+    safari: '13.1'
+  },
+  {
+    name: 'scrollbar-width',
+    pattern: /scrollbar-width\s*:/,
+    scope: 'example',
+    setsFloor: false,
+    chrome: 121,
+    firefox: 64,
+    safari: '18.2'
+  }
 ];
 
 const walk = (dir, out = []) => {
@@ -113,7 +187,10 @@ const derived = { chrome: maxOf('chrome'), firefox: maxOf('firefox'), safari: ma
 const stated = doc.match(/Floor:\s*Chrome\s*([\d.]+)\s*·\s*Firefox\s*([\d.]+)\s*·\s*Safari\s*([\d.]+)/);
 check(
   `the stated floor is the one the shipped features imply`,
-  Boolean(stated) && stated[1] === String(derived.chrome) && stated[2] === String(derived.firefox) && stated[3] === String(derived.safari),
+  Boolean(stated) &&
+    stated[1] === String(derived.chrome) &&
+    stated[2] === String(derived.firefox) &&
+    stated[3] === String(derived.safari),
   stated
     ? `document says Chrome ${stated[1]} · Firefox ${stated[2]} · Safari ${stated[3]}; the registry implies Chrome ${derived.chrome} · Firefox ${derived.firefox} · Safari ${derived.safari}`
     : `no "Floor: Chrome … · Firefox … · Safari …" line in ${DOC}`

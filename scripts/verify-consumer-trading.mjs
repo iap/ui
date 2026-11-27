@@ -29,7 +29,18 @@
  */
 import { execFileSync } from 'node:child_process';
 import {
-  copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync
 } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -54,7 +65,8 @@ const check = (name, ok, detail) => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
 
-const run = (bin, args, options) => execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
+const run = (bin, args, options) =>
+  execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
 const read = (file) => readFileSync(file, 'utf8');
 
 // Same npm invocation technique as verify-consumer.mjs: `npm` is not an executable on Windows, and
@@ -101,24 +113,34 @@ try {
   let tarball = null;
   let packError = null;
   try {
-    const out = run(npmCommand, npmArgs(['pack', '--json', '--pack-destination', tarballs]), npmOptions(resolve(root, PACKAGE.dir)));
+    const out = run(
+      npmCommand,
+      npmArgs(['pack', '--json', '--pack-destination', tarballs]),
+      npmOptions(resolve(root, PACKAGE.dir))
+    );
     const manifest = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1))[0];
     tarball = join(tarballs, manifest.filename);
   } catch (error) {
     // `prepack` runs here (it copies the licence files in), so a broken lifecycle script surfaces
     // as a pack failure rather than weeks later as a consumer's 404.
-    packError = String(error.stderr ?? error.message).split('\n').slice(0, 2).join(' ');
+    packError = String(error.stderr ?? error.message)
+      .split('\n')
+      .slice(0, 2)
+      .join(' ');
   }
   const tarballBytes = tarball && existsSync(tarball) ? statSync(tarball).size : 0;
   check(
     `${PACKAGE.name} packs a tarball`,
     tarballBytes > 0,
-    tarballBytes > 0 ? `${basename(tarball)} (${tarballBytes} bytes)` : packError ?? 'no tarball written'
+    tarballBytes > 0 ? `${basename(tarball)} (${tarballBytes} bytes)` : (packError ?? 'no tarball written')
   );
 
   // ── 3. install into a project outside the repository ──────────────────────
   mkdirSync(consumer, { recursive: true });
-  writeFileSync(join(consumer, 'package.json'), JSON.stringify({ name: 'trading-consumer', private: true, version: '0.0.0', type: 'module' }, null, 2) + '\n');
+  writeFileSync(
+    join(consumer, 'package.json'),
+    JSON.stringify({ name: 'trading-consumer', private: true, version: '0.0.0', type: 'module' }, null, 2) + '\n'
+  );
   let installError = null;
   if (tarballBytes > 0) {
     try {
@@ -127,11 +149,23 @@ try {
       // packument, and --ignore-scripts skips lifecycle scripts the tarball should not need.
       run(
         npmCommand,
-        npmArgs(['install', tarball, '--omit=peer', '--legacy-peer-deps', '--no-audit', '--no-fund', '--ignore-scripts', '--offline']),
+        npmArgs([
+          'install',
+          tarball,
+          '--omit=peer',
+          '--legacy-peer-deps',
+          '--no-audit',
+          '--no-fund',
+          '--ignore-scripts',
+          '--offline'
+        ]),
         npmOptions(consumer)
       );
     } catch (error) {
-      installError = String(error.stderr ?? error.message).split('\n').slice(0, 3).join(' ');
+      installError = String(error.stderr ?? error.message)
+        .split('\n')
+        .slice(0, 3)
+        .join(' ');
     }
   } else {
     installError = 'no tarball — the pack step failed';
@@ -171,7 +205,9 @@ try {
   // Compare realpaths: on macOS the system temp directory is reached through a symlink, so Node
   // hands back /private/var/... while this script holds /var/... — a string prefix test would call
   // a perfectly good install "outside the consumer" (verify-consumer.mjs hit exactly that).
-  const consumerModules = existsSync(join(consumer, 'node_modules')) ? realpathSync(join(consumer, 'node_modules')) : null;
+  const consumerModules = existsSync(join(consumer, 'node_modules'))
+    ? realpathSync(join(consumer, 'node_modules'))
+    : null;
   const insideConsumer = (file) => {
     if (!consumerModules || typeof file !== 'string') return false;
     try {
@@ -199,7 +235,7 @@ try {
   check(
     'the resolved stylesheet carries the component styles',
     cssOk,
-    cssOk ? `${cssBytes} bytes, contains ${CSS_SELECTOR}` : cssError ?? `${cssBytes} bytes, ${CSS_SELECTOR} absent`
+    cssOk ? `${cssBytes} bytes, contains ${CSS_SELECTOR}` : (cssError ?? `${cssBytes} bytes, ${CSS_SELECTOR} absent`)
   );
 
   // ── 5. rebuild the real screen, from the scratch project ──────────────────
@@ -248,7 +284,9 @@ try {
   check(
     'the bundle contains the real screen and the library',
     markersOk,
-    markersOk ? `contains ${SCREEN_MARKER} and ${JS_CLASS_MARKER}` : `missing ${js.includes(SCREEN_MARKER) ? JS_CLASS_MARKER : SCREEN_MARKER}`
+    markersOk
+      ? `contains ${SCREEN_MARKER} and ${JS_CLASS_MARKER}`
+      : `missing ${js.includes(SCREEN_MARKER) ? JS_CLASS_MARKER : SCREEN_MARKER}`
   );
 
   // An unresolved bare import would be reported as external and shipped to the browser as a
@@ -258,7 +296,11 @@ try {
   check(
     'nothing is left external for the browser',
     metafile !== null && externals.length === 0,
-    metafile === null ? 'no metafile — the bundle step failed' : externals.length ? `left external: ${externals.join(', ')}` : 'all imports resolved into the bundle'
+    metafile === null
+      ? 'no metafile — the bundle step failed'
+      : externals.length
+        ? `left external: ${externals.join(', ')}`
+        : 'all imports resolved into the bundle'
   );
 
   // ── 6. the page the app opens points at what was built ────────────────────
@@ -283,13 +325,19 @@ try {
 
 const failed = checks.filter((c) => !c.ok);
 if (checks.length !== EXPECTED_COUNTS.consumerTrading) {
-  console.error(`trading dogfood: ran ${checks.length} checks, scripts/counts/consumer-trading.mjs declares ${EXPECTED_COUNTS.consumerTrading}`);
+  console.error(
+    `trading dogfood: ran ${checks.length} checks, scripts/counts/consumer-trading.mjs declares ${EXPECTED_COUNTS.consumerTrading}`
+  );
   process.exit(1);
 }
 if (failed.length > 0) {
   console.error(`\ntrading dogfood: ${checks.length - failed.length}/${checks.length} checks passed`);
-  console.error('The trading example is the deepest consumer this repository has; a failure here means the packed artifact cannot rebuild it.');
+  console.error(
+    'The trading example is the deepest consumer this repository has; a failure here means the packed artifact cannot rebuild it.'
+  );
   if (keep) console.error(`Scratch project kept at ${work}`);
   process.exit(1);
 }
-console.log(`\ntrading dogfood: ${checks.length}/${checks.length} checks passed — the trading example builds from what a stranger would install`);
+console.log(
+  `\ntrading dogfood: ${checks.length}/${checks.length} checks passed — the trading example builds from what a stranger would install`
+);

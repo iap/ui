@@ -23,14 +23,26 @@ if (!existsSync(resolve(dist, 'index.html'))) {
   process.exit(1);
 }
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+const TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8'
+};
 const PORT = 4176;
 const server = createServer((req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (url === '/favicon.ico') { res.writeHead(204); res.end(); return; }
+  if (url === '/favicon.ico') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
   const rel = url === '/' ? 'index.html' : url.replace(/^\/+/, '');
   const file = join(dist, normalize(rel));
-  if (!file.startsWith(dist) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
+  if (!file.startsWith(dist) || !existsSync(file) || !statSync(file).isFile()) {
+    res.writeHead(404);
+    res.end('not found');
+    return;
+  }
   res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
   res.end(readFileSync(file));
 });
@@ -42,13 +54,22 @@ const check = (name, pass, detail) => results.push({ name, pass, detail });
 // The live-feed check below reads a frame, so the engine must not throttle an inactive page the
 // way the browser suite already guards against (scripts/browser-suite.mjs, same flags).
 const browser = await chromium.launch({
-  args: ['--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows']
+  args: [
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding',
+    '--disable-backgrounding-occluded-windows'
+  ]
 });
 
-for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow', width: 900, height: 700 }]) {
+for (const vp of [
+  { name: 'desktop', width: 1600, height: 900 },
+  { name: 'narrow', width: 900, height: 700 }
+]) {
   const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
   const consoleErrors = [];
-  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+  page.on('console', (m) => {
+    if (m.type() === 'error') consoleErrors.push(m.text());
+  });
   page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
 
   await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'load' });
@@ -79,11 +100,27 @@ for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow
 
   const rowHeight = 23;
   const visibleRows = Math.round(m.wrapClientHeight / rowHeight);
-  check(`${vp.name}: page itself does not scroll (content fills the viewport)`, Math.abs(m.scrolls) <= 1, `scrollHeight-clientHeight=${m.scrolls}px, body=${m.bodyHeight}px`);
+  check(
+    `${vp.name}: page itself does not scroll (content fills the viewport)`,
+    Math.abs(m.scrolls) <= 1,
+    `scrollHeight-clientHeight=${m.scrolls}px, body=${m.bodyHeight}px`
+  );
   check(`${vp.name}: no horizontal overflow`, Math.abs(m.hasOverflowX) <= 1, `overflow=${m.hasOverflowX}px`);
-  check(`${vp.name}: watchlist is virtualized`, m.domRows > 0 && m.domRows < 80 && m.ariaRowcount === '5001', `dom rows=${m.domRows}, aria-rowcount=${m.ariaRowcount}`);
-  check(`${vp.name}: ARIA row index accounts for the window offset`, Number(m.ariaRowindexFirst) >= 2, `first aria-rowindex=${m.ariaRowindexFirst}`);
-  check(`${vp.name}: dense row rhythm`, visibleRows >= 14, `~${visibleRows} rows fit in ${m.wrapClientHeight}px (${rowHeight}px rows)`);
+  check(
+    `${vp.name}: watchlist is virtualized`,
+    m.domRows > 0 && m.domRows < 80 && m.ariaRowcount === '5001',
+    `dom rows=${m.domRows}, aria-rowcount=${m.ariaRowcount}`
+  );
+  check(
+    `${vp.name}: ARIA row index accounts for the window offset`,
+    Number(m.ariaRowindexFirst) >= 2,
+    `first aria-rowindex=${m.ariaRowindexFirst}`
+  );
+  check(
+    `${vp.name}: dense row rhythm`,
+    visibleRows >= 14,
+    `~${visibleRows} rows fit in ${m.wrapClientHeight}px (${rowHeight}px rows)`
+  );
   check(`${vp.name}: base type is 12px, not 14px+`, m.fontSize === '12px', `body font-size=${m.fontSize}`);
 
   // The book is live: the rAF feed must move prices across frames. The whole body is read, not one
@@ -126,8 +163,16 @@ for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow
       scrollTop: Math.round(wrap.scrollTop)
     };
   });
-  check(`${vp.name}: windowing moves with the scroll`, (after.firstRowIndex ?? 0) > 1000, `scrolled to row ${after.firstRowIndex} (${after.symbol})`);
-  check(`${vp.name}: sticky header holds while scrolled`, after.headerPinned, `scrollTop=${after.scrollTop}, pinned=${after.headerPinned}`);
+  check(
+    `${vp.name}: windowing moves with the scroll`,
+    (after.firstRowIndex ?? 0) > 1000,
+    `scrolled to row ${after.firstRowIndex} (${after.symbol})`
+  );
+  check(
+    `${vp.name}: sticky header holds while scrolled`,
+    after.headerPinned,
+    `scrollTop=${after.scrollTop}, pinned=${after.headerPinned}`
+  );
 
   // themes
   const themes = await page.evaluate(async () => {
@@ -142,7 +187,11 @@ for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow
     }
     return out;
   });
-  check(`${vp.name}: all three themes apply`, themes.join(' ') === 'Light->light Dark->dark Contrast->high-contrast', themes.join(' '));
+  check(
+    `${vp.name}: all three themes apply`,
+    themes.join(' ') === 'Light->light Dark->dark Contrast->high-contrast',
+    themes.join(' ')
+  );
 
   // ticket guard: an order above buying power must warn inline and must not be submittable.
   // React ignores direct .value writes, so set it through the native setter + input event.
@@ -156,19 +205,19 @@ for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow
     };
     await setQty('100000');
     const warned = Boolean(document.querySelector('.ticket__warn'));
-    const buy = [...document.querySelectorAll('.ticket__actions button')]
-      .find((b) => /^(Buy|Sell) \d/.test(b.textContent.trim()));
+    const buy = [...document.querySelectorAll('.ticket__actions button')].find((b) =>
+      /^(Buy|Sell) \d/.test(b.textContent.trim())
+    );
     const submitDisabled = buy ? buy.disabled : null;
     await setQty('100');
     const warnGone = !document.querySelector('.ticket__warn');
     // Reset must restore the WHOLE ticket: side back to buy, defaults back in the inputs
     document.querySelector(".side button[data-side='sell']").click();
     await new Promise((r) => setTimeout(r, 120));
-    [...document.querySelectorAll('.ticket__actions button')]
-      .find((b) => b.textContent.trim() === 'Reset').click();
+    [...document.querySelectorAll('.ticket__actions button')].find((b) => b.textContent.trim() === 'Reset').click();
     await new Promise((r) => setTimeout(r, 150));
-    const sideRestored = document.querySelector(".side button[data-side='buy']")
-      .getAttribute('aria-pressed') === 'true';
+    const sideRestored =
+      document.querySelector(".side button[data-side='buy']").getAttribute('aria-pressed') === 'true';
     const qtyRestored = document.querySelector('#tk-qty').value === '100';
     return { warned, submitDisabled, warnGone, sideRestored, qtyRestored };
   });
@@ -184,27 +233,53 @@ for (const vp of [{ name: 'desktop', width: 1600, height: 900 }, { name: 'narrow
   );
 
   // accessibility, light then dark
-  await page.evaluate(() => { for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Light') b.click(); });
+  await page.evaluate(() => {
+    for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Light') b.click();
+  });
   await page.waitForTimeout(200);
   const lightDetail = await page.evaluate(async () => {
     const v = (await window.axe.run(document, { resultTypes: ['violations'] })).violations;
-    return v.map((x) => `${x.id}×${x.nodes.length} [${x.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}]`).join('; ');
+    return v
+      .map(
+        (x) =>
+          `${x.id}×${x.nodes.length} [${x.nodes
+            .slice(0, 2)
+            .map((n) => n.target.join(' '))
+            .join(' | ')}]`
+      )
+      .join('; ');
   });
   const light = lightDetail ? lightDetail.split('; ') : [];
-  await page.evaluate(() => { for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Dark') b.click(); });
+  await page.evaluate(() => {
+    for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Dark') b.click();
+  });
   await page.waitForTimeout(200);
   const darkDetail = await page.evaluate(async () => {
     const v = (await window.axe.run(document, { resultTypes: ['violations'] })).violations;
-    return v.map((x) => `${x.id}×${x.nodes.length} [${x.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}]`).join('; ');
+    return v
+      .map(
+        (x) =>
+          `${x.id}×${x.nodes.length} [${x.nodes
+            .slice(0, 2)
+            .map((n) => n.target.join(' '))
+            .join(' | ')}]`
+      )
+      .join('; ');
   });
   const dark = darkDetail ? darkDetail.split('; ') : [];
 
   check(`${vp.name}: axe clean (light)`, light.length === 0, light.length ? lightDetail : '0 violations');
   check(`${vp.name}: axe clean (dark)`, dark.length === 0, dark.length ? darkDetail : '0 violations');
-  check(`${vp.name}: no console errors`, consoleErrors.length === 0, `${consoleErrors.length}${consoleErrors.length ? ': ' + consoleErrors[0].slice(0, 120) : ''}`);
+  check(
+    `${vp.name}: no console errors`,
+    consoleErrors.length === 0,
+    `${consoleErrors.length}${consoleErrors.length ? ': ' + consoleErrors[0].slice(0, 120) : ''}`
+  );
 
   await page.screenshot({ path: resolve(shots, `${vp.name}-dark.png`) });
-  await page.evaluate(() => { for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Light') b.click(); });
+  await page.evaluate(() => {
+    for (const b of document.querySelectorAll('.top button')) if (b.textContent.trim() === 'Light') b.click();
+  });
   await page.waitForTimeout(150);
   await page.screenshot({ path: resolve(shots, `${vp.name}-light.png`) });
 
@@ -216,13 +291,19 @@ server.close();
 
 if (results.length !== EXPECTED_COUNTS.trading) {
   console.error(
-    `trading suite: ${results.length} checks ran but scripts/counts/trading.mjs declares ${EXPECTED_COUNTS.trading}. `
-    + 'Update that number and the docs it feeds in the same change, then run check:docs.'
+    `trading suite: ${results.length} checks ran but scripts/counts/trading.mjs declares ${EXPECTED_COUNTS.trading}. ` +
+      'Update that number and the docs it feeds in the same change, then run check:docs.'
   );
   process.exit(1);
 }
 const passed = results.filter((r) => r.pass).length;
-const report = { checkedAt: new Date().toISOString(), total: results.length, passed, failed: results.length - passed, results };
+const report = {
+  checkedAt: new Date().toISOString(),
+  total: results.length,
+  passed,
+  failed: results.length - passed,
+  results
+};
 writeFileSync(resolve(root, 'verification', 'screen-report.json'), JSON.stringify(report, null, 2), 'utf8');
 for (const r of results) console.log(`${r.pass ? 'PASS' : 'FAIL'}  ${r.name}  — ${r.detail}`);
 console.log(`\nTOTAL: ${passed}/${results.length}`);

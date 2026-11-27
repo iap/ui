@@ -56,7 +56,9 @@ const bytes = (p) => readFileSync(p).length;
 check(
   'build artifacts present',
   missing.length === 0,
-  missing.length ? `missing: ${missing.join(', ')}` : artifacts.map((f) => `${f}=${bytes(resolve(dist, f))}B`).join(', ')
+  missing.length
+    ? `missing: ${missing.join(', ')}`
+    : artifacts.map((f) => `${f}=${bytes(resolve(dist, f))}B`).join(', ')
 );
 const perComponent = readdirSync(resolve(dist, 'components')).filter((f) => f.endsWith('.css'));
 check('per-component CSS emitted', perComponent.length >= 7, `${perComponent.length} files`);
@@ -164,7 +166,11 @@ const switcherMarkup = renderToStaticMarkup(
 );
 check(
   'SSR: a content-less tab switcher renders no empty tabpanel',
-  /role="tablist"/.test(switcherMarkup) && !/role="tabpanel"/.test(switcherMarkup) && !/aria-controls=/.test(switcherMarkup) && /role="tabpanel"/.test(markup) && /aria-controls="/.test(markup),
+  /role="tablist"/.test(switcherMarkup) &&
+    !/role="tabpanel"/.test(switcherMarkup) &&
+    !/aria-controls=/.test(switcherMarkup) &&
+    /role="tabpanel"/.test(markup) &&
+    /aria-controls="/.test(markup),
   `switcher: tablist=${/role="tablist"/.test(switcherMarkup)}, panels=${(switcherMarkup.match(/role="tabpanel"/g) ?? []).length}, controls=${(switcherMarkup.match(/aria-controls=/g) ?? []).length}; content-bearing: panels=${(markup.match(/role="tabpanel"/g) ?? []).length}, controls=${(markup.match(/aria-controls="/g) ?? []).length}`
 );
 check(
@@ -194,12 +200,23 @@ const bigColumns = [
     width: 80,
     numeric: true,
     render: (r) =>
-      h(ui.Cell, { numeric: true, tone: r.chg >= 0 ? 'positive' : 'negative', direction: r.chg >= 0 ? 'up' : 'down' }, Math.abs(r.chg).toFixed(2))
+      h(
+        ui.Cell,
+        { numeric: true, tone: r.chg >= 0 ? 'positive' : 'negative', direction: r.chg >= 0 ? 'up' : 'down' },
+        Math.abs(r.chg).toFixed(2)
+      )
   }
 ];
 const t0 = performance.now();
 const bigMarkup = renderToStaticMarkup(
-  h(ui.DataTable, { columns: bigColumns, rows: bigRows, getRowKey: (r) => r.symbol, density: 'dense', rowCount: 200000, focusableRows: true })
+  h(ui.DataTable, {
+    columns: bigColumns,
+    rows: bigRows,
+    getRowKey: (r) => r.symbol,
+    density: 'dense',
+    rowCount: 200000,
+    focusableRows: true
+  })
 );
 const ssrMs = Math.round(performance.now() - t0);
 const domRows = (bigMarkup.match(/<tr /g) ?? []).length;
@@ -214,7 +231,17 @@ const dom = new JSDOM('<!doctype html><html><head></head><body><div id="root"></
   pretendToBeVisual: true,
   url: 'http://localhost/'
 });
-for (const key of ['window', 'document', 'HTMLElement', 'Element', 'Node', 'Event', 'KeyboardEvent', 'MouseEvent', 'getComputedStyle']) {
+for (const key of [
+  'window',
+  'document',
+  'HTMLElement',
+  'Element',
+  'Node',
+  'Event',
+  'KeyboardEvent',
+  'MouseEvent',
+  'getComputedStyle'
+]) {
   try {
     Object.defineProperty(globalThis, key, { value: dom.window[key], configurable: true, writable: true });
   } catch {
@@ -327,7 +354,11 @@ const dlgHost = document.createElement('div');
 document.body.appendChild(dlgHost);
 function DialogReprobe() {
   const [open, setOpen] = React.useState(true);
-  return h(ui.Dialog, { open, onClose: () => setOpen(false), title: 'Ticket' }, h('button', { id: 'dlg-action' }, 'Confirm'));
+  return h(
+    ui.Dialog,
+    { open, onClose: () => setOpen(false), title: 'Ticket' },
+    h('button', { id: 'dlg-action' }, 'Confirm')
+  );
 }
 const dlgRoot = createRoot(dlgHost);
 await React.act(async () => dlgRoot.render(h(DialogReprobe)));
@@ -345,7 +376,11 @@ await React.act(async () => dlgRoot.unmount());
 const fieldHost = document.createElement('div');
 document.body.appendChild(fieldHost);
 const fieldRoot = createRoot(fieldHost);
-await React.act(async () => fieldRoot.render(h(ui.Field, { label: 'Price', error: 'Required' }, h(ui.Input, { 'aria-describedby': 'preset-help' }))));
+await React.act(async () =>
+  fieldRoot.render(
+    h(ui.Field, { label: 'Price', error: 'Required' }, h(ui.Input, { 'aria-describedby': 'preset-help' }))
+  )
+);
 const fieldInput = fieldHost.querySelector('input');
 const fieldDescribedBy = fieldInput?.getAttribute('aria-describedby') ?? '';
 check(
@@ -359,7 +394,18 @@ await React.act(async () => fieldRoot.unmount());
 const emptyHost = document.createElement('div');
 document.body.appendChild(emptyHost);
 const emptyRoot = createRoot(emptyHost);
-await React.act(async () => emptyRoot.render(h(ui.DataTable, { columns: [{ key: 'a', header: 'A' }, { key: 'b', header: 'B' }], rows: [], getRowKey: (_, i) => i })));
+await React.act(async () =>
+  emptyRoot.render(
+    h(ui.DataTable, {
+      columns: [
+        { key: 'a', header: 'A' },
+        { key: 'b', header: 'B' }
+      ],
+      rows: [],
+      getRowKey: (_, i) => i
+    })
+  )
+);
 const emptyCell = emptyHost.querySelector('.ui-table__empty');
 check(
   'the empty-state cell is a gridcell spanning the full column count',
@@ -420,7 +466,14 @@ function MiscProbe() {
   return h(
     'div',
     null,
-    h(ui.Checkbox, { label: 'Bracket', checked: on, onChange: (e) => { checkboxChanges++; setOn(e.target.checked); } }),
+    h(ui.Checkbox, {
+      label: 'Bracket',
+      checked: on,
+      onChange: (e) => {
+        checkboxChanges++;
+        setOn(e.target.checked);
+      }
+    }),
     h(ui.Radio, { label: 'Day', name: 'tif', defaultChecked: true }),
     h(ui.Switch, { label: 'Live', defaultChecked: true }),
     h(ui.Banner, { tone: 'danger', title: 'Rejected' }, 'Insufficient buying power'),
@@ -431,10 +484,18 @@ const miscRoot = createRoot(miscHost);
 await React.act(async () => miscRoot.render(h(MiscProbe)));
 const cb = miscHost.querySelector('input[type="checkbox"]:not([role="switch"])');
 await React.act(async () => click(cb));
-check('Checkbox toggles and fires onChange', checkboxChanges === 1 && cb.checked === true, `changes=${checkboxChanges}, checked=${cb.checked}`);
+check(
+  'Checkbox toggles and fires onChange',
+  checkboxChanges === 1 && cb.checked === true,
+  `changes=${checkboxChanges}, checked=${cb.checked}`
+);
 const sw = miscHost.querySelector('[role="switch"]');
 const radio = miscHost.querySelector('input[type="radio"]');
-check('Selection controls render with correct semantics', Boolean(sw && radio), `role=switch=${Boolean(sw)}, radio=${Boolean(radio)}`);
+check(
+  'Selection controls render with correct semantics',
+  Boolean(sw && radio),
+  `role=switch=${Boolean(sw)}, radio=${Boolean(radio)}`
+);
 const banner = miscHost.querySelector('.ui-banner--danger');
 const region = miscHost.querySelector('[role="region"][aria-label="Notifications"]');
 const liveToast = miscHost.querySelector('.ui-toast[aria-live="polite"]');
@@ -578,8 +639,7 @@ await React.act(async () => {
 let tip = container.querySelector('[role="tooltip"]');
 check(
   'hover shows the tooltip and MERGES aria-describedby with any preset value',
-  Boolean(tip) &&
-    tipTrigger.getAttribute('aria-describedby') === `preset-desc ${tip.getAttribute('id')}`,
+  Boolean(tip) && tipTrigger.getAttribute('aria-describedby') === `preset-desc ${tip.getAttribute('id')}`,
   `describedby=${tipTrigger.getAttribute('aria-describedby')} (expected "preset-desc" plus the tooltip id)`
 );
 await React.act(async () => {
@@ -589,11 +649,7 @@ await React.act(async () => {
   tipTrigger.dispatchEvent(new dom.window.Event('focusin', { bubbles: true }));
 });
 tip = container.querySelector('[role="tooltip"]');
-check(
-  'keyboard focus shows the tooltip again',
-  Boolean(tip),
-  `tooltip present=${Boolean(tip)}`
-);
+check('keyboard focus shows the tooltip again', Boolean(tip), `tooltip present=${Boolean(tip)}`);
 await React.act(async () => keydown(tipTrigger, 'Escape'));
 await React.act(async () => {
   tipTrigger.dispatchEvent(new dom.window.Event('focusout', { bubbles: true }));
@@ -685,7 +741,9 @@ check(
 await React.act(async () => keydown(lbTrigger, 'Enter'));
 check(
   'Enter commits the active option with the native onChange shape',
-  readLb().value === 'opg' && lbTrigger.getAttribute('aria-expanded') === 'false' && !container.querySelector('[role="listbox"]'),
+  readLb().value === 'opg' &&
+    lbTrigger.getAttribute('aria-expanded') === 'false' &&
+    !container.querySelector('[role="listbox"]'),
   `value=${readLb().value}, expanded=${readLb().expanded}, panel closed=${!container.querySelector('[role="listbox"]')}`
 );
 await React.act(async () => click(lbTrigger));
@@ -749,8 +807,13 @@ check(
   const realRaf = globalThis.requestAnimationFrame;
   const realCancel = globalThis.cancelAnimationFrame;
   const frames = [];
-  globalThis.requestAnimationFrame = (cb) => { frames.push(cb); return frames.length; };
-  globalThis.cancelAnimationFrame = (id) => { if (id) frames[id - 1] = null; };
+  globalThis.requestAnimationFrame = (cb) => {
+    frames.push(cb);
+    return frames.length;
+  };
+  globalThis.cancelAnimationFrame = (id) => {
+    if (id) frames[id - 1] = null;
+  };
 
   const tickHost = document.createElement('div');
   document.body.appendChild(tickHost);
@@ -768,23 +831,31 @@ check(
   await React.act(async () => tickRoot.render(h(TickProbe)));
   const baseline = renders;
 
-  await React.act(async () => { for (let i = 0; i < 100; i += 1) pushTick((n) => n + 1); });
+  await React.act(async () => {
+    for (let i = 0; i < 100; i += 1) pushTick((n) => n + 1);
+  });
   check(
     'useTicks: a burst of 100 ticks queues without rendering',
     renders === baseline && frames.length === 1,
     `renders=${renders} (expected ${baseline}), scheduled frames=${frames.length} (expected 1)`
   );
 
-  await React.act(async () => { frames.splice(0).forEach((cb) => cb && cb(16)); });
+  await React.act(async () => {
+    frames.splice(0).forEach((cb) => cb && cb(16));
+  });
   check(
     'useTicks: the burst commits as one render with every update applied in order',
     renders === baseline + 1 && seen === 100,
     `renders=${renders} (expected ${baseline + 1}), value=${seen} (expected 100)`
   );
 
-  await React.act(async () => { pushTick((n) => n + 1); });
+  await React.act(async () => {
+    pushTick((n) => n + 1);
+  });
   const beforeLateFlush = renders;
-  await React.act(async () => { frames.splice(0).forEach((cb) => cb && cb(32)); });
+  await React.act(async () => {
+    frames.splice(0).forEach((cb) => cb && cb(32));
+  });
   check(
     'useTicks: a later tick schedules a new flush and commits exactly once',
     beforeLateFlush === baseline + 1 && renders === baseline + 2 && seen === 101,
@@ -793,7 +864,10 @@ check(
 
   // React silently discards a setState on an unmounted component, so "no extra render" would pass
   // even without cleanup. Assert the observable thing instead: the scheduled frame is cancelled.
-  await React.act(async () => { pushTick((n) => n + 1); tickRoot.unmount(); });
+  await React.act(async () => {
+    pushTick((n) => n + 1);
+    tickRoot.unmount();
+  });
   const stillPending = frames.filter(Boolean).length;
   check(
     'useTicks: unmount cancels a pending flush',
@@ -831,7 +905,9 @@ check(
   await React.act(async () => root.render(h(CadenceProbe)));
   const baseline = renders;
 
-  await React.act(async () => { pushTick((n) => n + 1); });
+  await React.act(async () => {
+    pushTick((n) => n + 1);
+  });
   check(
     'useTicks: with no rAF the timeout path holds a tick until its cadence elapses',
     renders === baseline && seen === 0,
@@ -840,9 +916,13 @@ check(
 
   // Changing the cadence while a flush is pending must re-arm it: without the re-arm the tick
   // would wait out the original 60 s timer and the display would stay stale.
-  await React.act(async () => { setEvery(10); });
+  await React.act(async () => {
+    setEvery(10);
+  });
   const afterCadenceChange = renders; // the probe's own re-render, not the hook's flush
-  await React.act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
+  await React.act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 60));
+  });
   check(
     'useTicks: changing the cadence re-arms a pending flush at the new cadence',
     renders === afterCadenceChange + 1 && seen === 1,
@@ -876,8 +956,8 @@ const report = {
 };
 if (results.length !== EXPECTED_COUNTS.verify) {
   console.error(
-    `verify: ${results.length} checks ran but scripts/counts/verify.mjs declares ${EXPECTED_COUNTS.verify}. `
-    + 'Update that number and the docs it feeds in the same change, then run check:docs.'
+    `verify: ${results.length} checks ran but scripts/counts/verify.mjs declares ${EXPECTED_COUNTS.verify}. ` +
+      'Update that number and the docs it feeds in the same change, then run check:docs.'
   );
   process.exit(1);
 }

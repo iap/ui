@@ -29,6 +29,7 @@ static. They belong to this project: the naming, the roles and the mappings — 
 specification is tracked, inherited from, or named anywhere in this project.
 
 **Consequences.**
+
 - No consumer's spacing or colour changes because an upstream specification did.
 - The scale is ours to extend; new roles are added by mapping to existing primitives.
 - A faithful port of any other design system is explicitly out of scope. This is `UI`, not a port.
@@ -50,13 +51,14 @@ collision-aware positioning.
 dependencies only. Those primitives are implemented in-house.
 
 **Consequences.**
+
 - Accessibility correctness for those controls is our responsibility, and is covered by executable
   checks: focus trap in both directions, roving tabindex, Home/End, ARIA grid semantics with honest
   row counts, and axe-core in both themes across three engines.
 - The bundle stays small: the ESM build is ~4.3 kB gzip with no transitive weight.
 - **Revisit criterion.** If maintaining these controls ever costs materially more than taking a
-dependency would, the trade-off is reconsidered against measurements, not against impression. Until
-that happens the dependency stays out.
+  dependency would, the trade-off is reconsidered against measurements, not against impression. Until
+  that happens the dependency stays out.
 
 ---
 
@@ -72,6 +74,7 @@ during a session.
 `data-theme` on `<html>`.
 
 **Consequences.**
+
 - A theme switch costs **zero React renders** and runs no style code; the browser re-resolves the
   custom properties itself.
 - No styling engine ships, so there is nothing to run on the hot path.
@@ -92,6 +95,7 @@ without being paid for now.
 transition or an animation.
 
 **Consequences.**
+
 - The core ships no animation; the only `transition` declarations in the stylesheet set `none`.
 - A future opt-in entrypoint can consume the existing tokens without a breaking change to components.
 - Reduced-motion preferences are satisfied by construction rather than by a media query.
@@ -117,6 +121,7 @@ before every screenshot, and hard-fails any run whose harness cannot prove it fr
 content is made deterministic rather than hidden or excluded.
 
 **Consequences.**
+
 - Baseline diffs contain only antialiasing noise, which the 0.3% budget was calibrated for; no
   threshold was loosened.
 - The harness page, not just the library, is part of the capture contract — changing what it
@@ -152,6 +157,7 @@ text-size-adjust: 100%;
 exception still requires an ADR entry.
 
 **Consequences.**
+
 - The pin takes effect on iOS and is unchanged everywhere else: Chromium uses the unprefixed form it
   already used, desktop Firefox ignores both (as before), and an engine that understands both reads
   the same value twice.

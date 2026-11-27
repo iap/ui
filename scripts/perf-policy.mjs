@@ -99,10 +99,8 @@ export const isOverloadSignal = (r, { droppedRatio, staticP95Ms }) =>
 // comparison in the suite) is what lets scripts/check-perf-policy.mjs exercise the 25 ms boundary
 // itself: a gate that pins only the literal budget cannot see the comparison being loosened.
 // Informational engines always pass.
-export const tickingWithinBudget = (r, ctx) =>
-  !perfGated(ctx.platform, ctx.engineName) || r.p95 <= ctx.budgetMs;
-export const staticWithinBudget = (r, ctx) =>
-  !perfGated(ctx.platform, ctx.engineName) || r.staticP95 <= ctx.budgetMs;
+export const tickingWithinBudget = (r, ctx) => !perfGated(ctx.platform, ctx.engineName) || r.p95 <= ctx.budgetMs;
+export const staticWithinBudget = (r, ctx) => !perfGated(ctx.platform, ctx.engineName) || r.staticP95 <= ctx.budgetMs;
 
 // Should this reading be re-measured? Throttled, marginally over budget on a gated engine, cadence-
 // locked on a gated engine (the host is starved, not the library), or over budget on a gated engine

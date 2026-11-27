@@ -62,7 +62,10 @@ export const EXPECTED_SIZES = {
     bytes: 622,
     budget: 1500,
     budgetLabel: '1.5 kB',
-    docs: { 'docs/verification.md': 'ESM, `Button` only — tree-shaking guard', 'STATUS.md': 'Single-component import (`Button`)' }
+    docs: {
+      'docs/verification.md': 'ESM, `Button` only — tree-shaking guard',
+      'STATUS.md': 'Single-component import (`Button`)'
+    }
   },
   cjsFull: {
     entry: '@trade/ui CJS, full surface (consumer cost, min+gzip)',

@@ -81,23 +81,23 @@ branch. Its CI-checkable parts are covered by `npm run ci` itself.
 
 ## What the gate asserts
 
-| Check | Why it matters |
-|---|---|
-| No uncommitted changes, and no untracked files inside the packages | the tag points at a commit — but npm packs *untracked* files that live in a package directory, so a stray `packages/ui/README.md` would ship without ever being reviewed |
-| `HEAD` is `origin/main` | cutting from a branch tags something nobody reviewed |
-| A changelog entry exists for the version | the changelog is what a consumer reads first; a version with no section is a version nobody can evaluate |
-| Neither package is `private` | a `private: true` manifest silently cannot be published |
-| The packaging contract passes (`check:pack`) | the tarball is the release artifact — reused rather than restated here |
-| The package contract passes (`check-contract`) | zero runtime dependencies, peer-only React, and one version across manifests and the build |
-| The version is not already published (on GitHub Packages — needs the login from "Before you start") | npm rejects republishing a version; better to find out here than after tagging |
+| Check                                                                                               | Why it matters                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No uncommitted changes, and no untracked files inside the packages                                  | the tag points at a commit — but npm packs _untracked_ files that live in a package directory, so a stray `packages/ui/README.md` would ship without ever being reviewed |
+| `HEAD` is `origin/main`                                                                             | cutting from a branch tags something nobody reviewed                                                                                                                     |
+| A changelog entry exists for the version                                                            | the changelog is what a consumer reads first; a version with no section is a version nobody can evaluate                                                                 |
+| Neither package is `private`                                                                        | a `private: true` manifest silently cannot be published                                                                                                                  |
+| The packaging contract passes (`check:pack`)                                                        | the tarball is the release artifact — reused rather than restated here                                                                                                   |
+| The package contract passes (`check-contract`)                                                      | zero runtime dependencies, peer-only React, and one version across manifests and the build                                                                               |
+| The version is not already published (on GitHub Packages — needs the login from "Before you start") | npm rejects republishing a version; better to find out here than after tagging                                                                                           |
 
 ## After publishing
 
 - Verify from outside, as a consumer rather than as the author: `npm view @trade/ui version
-  --registry=https://npm.pkg.github.com` and the same for `@trade/tokens` must both answer with the
+--registry=https://npm.pkg.github.com` and the same for `@trade/tokens` must both answer with the
   version you just cut (or read the version off the Packages tab of the `trade` organisation).
-- The strongest available check is already in the suite: `npm run verify:consumer` installs the *packed
-  tarball* into a project outside the repository and uses it. It is the closest thing to a stranger's
+- The strongest available check is already in the suite: `npm run verify:consumer` installs the _packed
+  tarball_ into a project outside the repository and uses it. It is the closest thing to a stranger's
   first `npm install`.
 - If the release was wrong: prefer a follow-up patch. A version can be deleted from the package's
   settings on GitHub, but a deleted version breaks every lockfile that resolved it in the window
