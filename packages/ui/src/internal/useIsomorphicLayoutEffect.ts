@@ -6,5 +6,4 @@ import { useEffect, useLayoutEffect } from 'react';
  * synchronously after commit — which is what a ref read by a native event handler needs, since a
  * passive effect leaves a window in which the browser can dispatch against the previous value.
  */
-export const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+export const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;

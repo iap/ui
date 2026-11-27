@@ -49,14 +49,14 @@ also must not mask them. The rules live in `scripts/perf-policy.mjs`; every bran
 `npm run check:perf-policy`, which also pins the 25 ms budget so it cannot be loosened silently.
 
 **Engine-conditional gating** (the measured-reliability rule): on non-macOS, the Playwright
-WebKit *port's* perf numbers are informational (functional checks still gate); real WebKit is
+WebKit _port's_ perf numbers are informational (functional checks still gate); real WebKit is
 gated by the dedicated `browser-macos` CI job on `macos-latest`. On macOS runners the reverse —
 only real WebKit's perf gates, because shared-runner Chromium read a hardware-impossible 50 ms
 static p95. Full story: [STATUS.md](../STATUS.md), gh run 35205539648.
 
 ### `scripts/check-pack.mjs` — `npm run check:pack`
 
-The packaging contract. `check-contract.mjs` asserts what the manifests *say* (the `files` list,
+The packaging contract. `check-contract.mjs` asserts what the manifests _say_ (the `files` list,
 the exports map, the artifacts on disk) — it cannot catch an artifact that is declared correctly and
 still packs wrong, which has happened: #55's tarballs shipped with no licence files at all, because
 npm only packs files that exist **inside** the package directory, and only a human reading the diff
@@ -77,7 +77,7 @@ package asserts that `npm pack` produced a real manifest, so a broken command re
 
 The consumer contract — 17 checks. Everything else in this repository verifies the library **as a
 workspace**: the example apps resolve `@trade/ui` through npm's hoisted symlink, and `check:pack`
-inspects a tarball's *file list*. Neither can see whether a stranger who runs `npm install @trade/ui`
+inspects a tarball's _file list_. Neither can see whether a stranger who runs `npm install @trade/ui`
 gets a working package. A file present in `dist/` here but absent from the tarball loads perfectly in
 both apps and in every gate, and breaks only for the first real consumer (#79).
 
@@ -190,12 +190,12 @@ are covered by `REUSE.toml` (REUSE Specification 3.0).
 unminified artifact, which overstated every number by roughly a quarter and made the ESM budget look
 almost exhausted.) **Four budgets:**
 
-| Entry | Budget | Measured |
-|---|---|---|
-| ESM, full surface | 7 kB | 6.18 kB |
-| ESM, `Button` only — tree-shaking guard | 1.5 kB | 622 B |
-| CJS, full surface | 7.5 kB | 6.66 kB |
-| Stylesheet (all components) | 8 kB | 3.76 kB |
+| Entry                                   | Budget | Measured |
+| --------------------------------------- | ------ | -------- |
+| ESM, full surface                       | 7 kB   | 6.18 kB  |
+| ESM, `Button` only — tree-shaking guard | 1.5 kB | 622 B    |
+| CJS, full surface                       | 7.5 kB | 6.66 kB  |
+| Stylesheet (all components)             | 8 kB   | 3.76 kB  |
 
 `scripts/check-size-claims.mjs` re-measures the build and holds every document that states a size to this table (`20 checks`).
 

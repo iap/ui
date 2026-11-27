@@ -39,10 +39,10 @@ if (pins.length === 0) {
 }
 if (pins.length > 1) {
   console.error(
-    'verify:browser:docker — the CI jobs pin more than one Playwright image:\n'
-      + pins.map((p) => `    ${p}`).join('\n')
-      + '\n  The generation environment must equal the comparison environment (ADR-005), so this'
-      + '\n  refuses to guess. Align the pins, then re-run.'
+    'verify:browser:docker — the CI jobs pin more than one Playwright image:\n' +
+      pins.map((p) => `    ${p}`).join('\n') +
+      '\n  The generation environment must equal the comparison environment (ADR-005), so this' +
+      '\n  refuses to guess. Align the pins, then re-run.'
   );
   process.exit(1);
 }
@@ -53,9 +53,9 @@ try {
   execFileSync('docker', ['info'], { stdio: 'ignore' });
 } catch {
   console.error(
-    'verify:browser:docker — Docker is not reachable.\n'
-      + '  Start Docker Desktop (or `podman machine start`) and retry.\n'
-      + "  On hosts below Playwright's macOS floor this is the only way to run the browser suite."
+    'verify:browser:docker — Docker is not reachable.\n' +
+      '  Start Docker Desktop (or `podman machine start`) and retry.\n' +
+      "  On hosts below Playwright's macOS floor this is the only way to run the browser suite."
   );
   process.exit(1);
 }
@@ -69,15 +69,13 @@ if (user.length) {
   // A named volume is created root-owned; hand it to the developer before npm ci writes into it.
   // `chown -R` on an empty or already-correct volume is a no-op, so this is safe to repeat.
   try {
-    execFileSync(
-      'docker',
-      ['run', '--rm', '-v', `${VOLUME}:/work`, image, 'chown', '-R', `${uid}:${gid}`, '/work'],
-      { stdio: 'ignore' }
-    );
+    execFileSync('docker', ['run', '--rm', '-v', `${VOLUME}:/work`, image, 'chown', '-R', `${uid}:${gid}`, '/work'], {
+      stdio: 'ignore'
+    });
   } catch {
     console.error(
-      `verify:browser:docker — could not take ownership of the \`${VOLUME}\` volume.\n`
-        + `  If an earlier root run created it, remove it and retry:  docker volume rm ${VOLUME}`
+      `verify:browser:docker — could not take ownership of the \`${VOLUME}\` volume.\n` +
+        `  If an earlier root run created it, remove it and retry:  docker volume rm ${VOLUME}`
     );
     process.exit(1);
   }
@@ -100,15 +98,22 @@ try {
   execFileSync(
     'docker',
     [
-      'run', '--rm',
+      'run',
+      '--rm',
       ...user,
       '--shm-size=1g',
-      '-v', `${root}:/work`,
-      '-v', `${VOLUME}:/work/node_modules`,
-      '-w', '/work',
-      '-e', 'HOME=/tmp',
+      '-v',
+      `${root}:/work`,
+      '-v',
+      `${VOLUME}:/work/node_modules`,
+      '-w',
+      '/work',
+      '-e',
+      'HOME=/tmp',
       image,
-      'bash', '-lc', steps.join(' && ')
+      'bash',
+      '-lc',
+      steps.join(' && ')
     ],
     { stdio: 'inherit' }
   );

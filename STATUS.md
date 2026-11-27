@@ -14,13 +14,13 @@ here — can pick it up without re-deriving anything.
 
 A working, verified component library. Not yet used by a real application.
 
-| Package | Purpose | State |
-|---|---|---|
-| `@trade/tokens` | primitives → theme roles, compiled to static CSS + typed TS | done |
-| `@trade/ui` | 14 components, static CSS, 3 themes, no animation | done |
-| `apps/example` | watchlist + order ticket component reference | done |
-| `apps/example-trading` | production-grade trading workspace example, with a live book coalesced by `useTicks` | done |
-| `harness/` + `scripts/` | self-measuring browser harness, verification suites | done |
+| Package                 | Purpose                                                                              | State |
+| ----------------------- | ------------------------------------------------------------------------------------ | ----- |
+| `@trade/tokens`         | primitives → theme roles, compiled to static CSS + typed TS                          | done  |
+| `@trade/ui`             | 14 components, static CSS, 3 themes, no animation                                    | done  |
+| `apps/example`          | watchlist + order ticket component reference                                         | done  |
+| `apps/example-trading`  | production-grade trading workspace example, with a live book coalesced by `useTicks` | done  |
+| `harness/` + `scripts/` | self-measuring browser harness, verification suites                                  | done  |
 
 **Components:** Button, Input, Select (native `<select>`, plus a listbox variant), Field,
 Checkbox/Radio/Switch, DataTable + Cell, Tabs, Menu, Popover, Tooltip, Dialog, Banner/Toast,
@@ -29,17 +29,17 @@ ThemeProvider, Stack.
 **Themes:** light, dark, high-contrast. A theme is a role→primitive mapping; adding one requires no
 component change.
 
-| Measured | Value |
-|---|---|
-| Runtime dependencies | **0** (React/React DOM are peers) |
-| ESM bundle (as a consumer ships it) | **6.18 kB** min+gzip (budget 7 kB) |
-| Single-component import (`Button`) | **622 B** min+gzip (budget 1.5 kB) |
-| Stylesheet | **3.76 kB** min+gzip (budget 8 kB) |
-| Theme switch cost | **0 React renders** |
-| Ticking frame time, Chromium/Firefox | **p95 16.7 ms**, 0 dropped frames |
-| Ticking frame time, WebKit | **gates pass on real macOS WebKit**; the 26–36 ms seen on the Playwright port was a port artifact (resolved 2026-09-17) |
-| axe (light + dark, 3 engines) | **0 violations** |
-| Contrast contract | **69/69 pairs** across 3 themes |
+| Measured                             | Value                                                                                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Runtime dependencies                 | **0** (React/React DOM are peers)                                                                                       |
+| ESM bundle (as a consumer ships it)  | **6.18 kB** min+gzip (budget 7 kB)                                                                                      |
+| Single-component import (`Button`)   | **622 B** min+gzip (budget 1.5 kB)                                                                                      |
+| Stylesheet                           | **3.76 kB** min+gzip (budget 8 kB)                                                                                      |
+| Theme switch cost                    | **0 React renders**                                                                                                     |
+| Ticking frame time, Chromium/Firefox | **p95 16.7 ms**, 0 dropped frames                                                                                       |
+| Ticking frame time, WebKit           | **gates pass on real macOS WebKit**; the 26–36 ms seen on the Playwright port was a port artifact (resolved 2026-09-17) |
+| axe (light + dark, 3 engines)        | **0 violations**                                                                                                        |
+| Contrast contract                    | **69/69 pairs** across 3 themes                                                                                         |
 
 ## Verify it
 
@@ -97,7 +97,7 @@ Individual: `npm run check:contract` · `check:contrast` · `verify` · `verify:
    set came from, so a visual diff would measure the OS family and not the change — the same reason
    `baselines/darwin/` had to be regenerated **on the runner** (item 3) instead of reused — and
    `perfGated` gates every non-WebKit engine off macOS, so a Windows job would perf-gate software
-   rendering. Exercising win32 in CI therefore needs runner-captured baselines *and* a stated win32
+   rendering. Exercising win32 in CI therefore needs runner-captured baselines _and_ a stated win32
    perf policy: a deliberate decision this item records instead of implying.
 
    If Windows-targeted rendering ever ships, **a distinct runner baseline target comes first**. A
@@ -106,19 +106,19 @@ Individual: `npm run check:contract` · `check:contrast` · `verify` · `verify:
    compare against - trading one gate for another. The platform key needs refining (or the runner
    given its own target) before any generation happens, and the win32 perf policy is stated in the
    same change.
-7. **Ungated by design** (recorded per Rule zero): commit-message *bodies* (subjects are gated by
+
+7. **Ungated by design** (recorded per Rule zero): commit-message _bodies_ (subjects are gated by
    `check:commits`; evidence-in-body is not machine-checkable); inline `style={{ }}` props in app
    JSX (app stylesheets are gated by `check:style`; inline JSX styles are convention only); the
    harness page's own inline styles (instrument chrome, generated by `build-harness.mjs`);
    **triaging review comments before a merge** (the user's, the bots', and Greptile's, including its
-   cross-file list and thread resolution) — `Greptile Review` reports *pass* while attaching findings,
+   cross-file list and thread resolution) — `Greptile Review` reports _pass_ while attaching findings,
    so no check can stand in for reading them (AGENTS.md git protocol); **seeing a new assertion
    fail before trusting it** and **publishing only numbers watched come out of a command in the
    same turn** (Working practice, 2026-09-26 — both are properties of a session's conduct, not of
    the tree, so nothing can enforce them).
 8. **macOS WebKit ticking p95 is marginal on the shared runner.** The same commit read p95=26 ms
-   against the 25 ms budget on two of three `browser-macos` runs (163-165 frames, gh run
-   35529998527) and passed on the third; the ubuntu `verify` job and a local win32 run were green
+   against the 25 ms budget on two of three `browser-macos` runs (163-165 frames, gh run 35529998527) and passed on the third; the ubuntu `verify` job and a local win32 run were green
    throughout. The next failing run (PR #28) showed why: chromium on the same box read a 57.9%
    dropped-frame ratio - no real hardware does that - so the shared runner was thrashing and
    WebKit's gated reading degraded with it. A gated reading within 5 ms of the budget, or one taken
@@ -135,7 +135,7 @@ Individual: `npm run check:contract` · `check:contrast` · `verify` · `verify:
    regression rather than a broken command. **Fixed 2026-09-26** by invoking npm through
    `process.execPath` + `npm_execpath` (npm's own CLI entry point, exported by `npm run`), with
    each package now asserting a real manifest so a broken command says so. The wider gap is
-   narrower now but not closed: nothing gates *every* script for *runnability on every platform*.
+   narrower now but not closed: nothing gates _every_ script for _runnability on every platform_.
    The `cross-platform` CI matrix runs the platform-sensitive gates — contract, pack, both consumer
    tarballs, style, types, unit tests, licence, docs, support, perf-policy and size — on
    `windows-latest`/Node 22.22.2 and `ubuntu-latest`/Node 24.15.0 (`.github/workflows/ci.yml`).

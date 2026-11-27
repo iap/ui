@@ -12,7 +12,7 @@ function makeRows(n) {
     out.push({
       symbol: `${SYMBOLS[i % SYMBOLS.length]}${i >= 12 ? '-' + i : ''}`,
       last: 100 + (i % 400) / 10,
-      chg: Math.round((((i * 37) % 400) - 200)) / 100,
+      chg: Math.round(((i * 37) % 400) - 200) / 100,
       volume: 1200000 + i * 9871
     });
   }
@@ -136,8 +136,12 @@ function App() {
             <Button variant="outline" onClick={() => setMode('full')} aria-pressed={mode === 'full'}>
               Full dataset (5,000 rows)
             </Button>
-            <Button variant="ghost" size="sm" id="to-dark" onClick={() => setThemeAttribute('dark')}>Dark</Button>
-            <Button variant="ghost" size="sm" id="to-light" onClick={() => setThemeAttribute('light')}>Light</Button>
+            <Button variant="ghost" size="sm" id="to-dark" onClick={() => setThemeAttribute('dark')}>
+              Dark
+            </Button>
+            <Button variant="ghost" size="sm" id="to-light" onClick={() => setThemeAttribute('light')}>
+              Light
+            </Button>
           </Stack>
 
           <Tabs

@@ -40,21 +40,21 @@ the router says you need them.
 
 ## Context router — open only what the task needs
 
-| If the task… | Open |
-|---|---|
+| If the task…                                                          | Open                                                                                    |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Conflicts with architecture or proposes a new dependency/motion model | `DECISIONS.md` (ADRs are binding; stop and surface conflicts — do not work around them) |
-| Touches known issues, roadmap, or “what’s left” | `STATUS.md` |
-| Needs the full recipe, token tiers, or PR/commit conventions in depth | `CONTRIBUTING.md` (laws §1, recipe §3, commits §7) |
-| Needs system depth (tokens, theming, CSS, a11y, verification, perf) | `docs/<topic>.md` via `docs/README.md` |
-| Otherwise | Stay in this file; follow the verification ladder |
+| Touches known issues, roadmap, or “what’s left”                       | `STATUS.md`                                                                             |
+| Needs the full recipe, token tiers, or PR/commit conventions in depth | `CONTRIBUTING.md` (laws §1, recipe §3, commits §7)                                      |
+| Needs system depth (tokens, theming, CSS, a11y, verification, perf)   | `docs/<topic>.md` via `docs/README.md`                                                  |
+| Otherwise                                                             | Stay in this file; follow the verification ladder                                       |
 
 ## Path reminders
 
-| You are editing… | Remember |
-|---|---|
-| `packages/ui/styles/**` | `var(--ui-*)` only; animation/`transition` only `none`; logical props; no `!important` |
-| `packages/tokens/**` | Roles in **all three** themes as `{primitive.reference}`; extend `check-contrast.mjs` for new pairs; never hand-edit `dist/` |
-| `scripts/**` | Never loosen thresholds to land a change; new conventions get a check in the same change (rule zero); baselines only via `npm run baselines:update` |
+| You are editing…        | Remember                                                                                                                                            |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui/styles/**` | `var(--ui-*)` only; animation/`transition` only `none`; logical props; no `!important`                                                              |
+| `packages/tokens/**`    | Roles in **all three** themes as `{primitive.reference}`; extend `check-contrast.mjs` for new pairs; never hand-edit `dist/`                        |
+| `scripts/**`            | Never loosen thresholds to land a change; new conventions get a check in the same change (rule zero); baselines only via `npm run baselines:update` |
 
 ## Repository map
 
@@ -81,15 +81,15 @@ scripts/check-style.mjs            CSS authoring contract (the laws, executable 
 Non-zero exit means the work is wrong, not that the command is flaky. When unsure or multi-area,
 run `npm run ci`.
 
-| Change class | Minimum |
-|---|---|
-| Docs / markdown only | `npm run check:docs` (full chain if docs affect counts/README) |
-| Tokens (`tokens.json` / token build) | `npm run build` && `npm run check:contrast` |
-| Library CSS / layout / focus | `npm run build` && `npm run check:style` && `npm run verify` && `npm run verify:browser` |
-| Components / public API | build + `check:style` + `check:types` + `verify`; add contrast if roles changed; example build/verify for touched apps; `verify:browser` if interaction or a11y |
-| Examples only | `npm run example:build` && `npm run verify:example` (and/or example-trading equivalents) |
-| Scripts / gates | Run the touched script(s); `check:docs` if docs quote counts; **never** loosen a threshold to pass |
-| Full release confidence | `npm run ci` |
+| Change class                         | Minimum                                                                                                                                                         |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Docs / markdown only                 | `npm run check:docs` (full chain if docs affect counts/README)                                                                                                  |
+| Tokens (`tokens.json` / token build) | `npm run build` && `npm run check:contrast`                                                                                                                     |
+| Library CSS / layout / focus         | `npm run build` && `npm run check:style` && `npm run verify` && `npm run verify:browser`                                                                        |
+| Components / public API              | build + `check:style` + `check:types` + `verify`; add contrast if roles changed; example build/verify for touched apps; `verify:browser` if interaction or a11y |
+| Examples only                        | `npm run example:build` && `npm run verify:example` (and/or example-trading equivalents)                                                                        |
+| Scripts / gates                      | Run the touched script(s); `check:docs` if docs quote counts; **never** loosen a threshold to pass                                                              |
+| Full release confidence              | `npm run ci`                                                                                                                                                    |
 
 Report the commands you ran and the pass counts they printed.
 
@@ -100,7 +100,7 @@ Report the commands you ran and the pass counts they printed.
    `calc(<px> * var(--ui-density))` + `--compact`/`--dense` variants setting
    `--ui-density: var(--ui-density-compact|dense)`.
 3. `packages/ui/src/components/<Name>.tsx` — `forwardRef`; destructure props; `cx('ui-x',
-   variant/density classes, className)`; spread `...rest`; default to the native element; guard
+variant/density classes, className)`; spread `...rest`; default to the native element; guard
    `typeof window/document === 'undefined'` for any DOM access.
 4. Export from `src/index.ts`.
 5. Add interaction checks to `scripts/verify.mjs`; render it in `scripts/sample-screen.mjs`.
@@ -129,7 +129,7 @@ rule, record it in `STATUS.md` as ungated so it stays visible.
 - If a CI run exists for your commit, watch it to completion and read the failures yourself before
   reporting success.
 - **A green check is not a review.** `Greptile Review`, CodeQL and `github-code-quality` all report
-  *pass* while attaching non-blocking findings. Read every review source before merging — these
+  _pass_ while attaching non-blocking findings. Read every review source before merging — these
   are the whole protocol, and every one of them pages, so a single call is never the whole answer:
   - inline review comments: `gh api --paginate repos/{owner}/{repo}/pulls/<n>/comments`
   - every issue-level comment, including Greptile's "Comments Outside Diff" cross-file list:

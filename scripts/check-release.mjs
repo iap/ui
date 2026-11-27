@@ -29,7 +29,8 @@ const check = (name, ok, detail) => {
   checks.push({ name, ok, detail });
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
-const run = (bin, args, options) => execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
+const run = (bin, args, options) =>
+  execFileSync(bin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
 const read = (p) => JSON.parse(readFileSync(resolve(root, p), 'utf8'));
 // Every RegExp metacharacter, not just the dot a version happens to contain.
 const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -62,7 +63,9 @@ check(
   'no uncommitted changes, and no untracked files inside the packages',
   tracked.length === 0 && strayInPackages.length === 0,
   tracked.length || strayInPackages.length
-    ? [...tracked.slice(0, 3), ...strayInPackages.slice(0, 3).map((l) => `untracked ${l.replace(/^\?\? /, '')}`)].join(' | ')
+    ? [...tracked.slice(0, 3), ...strayInPackages.slice(0, 3).map((l) => `untracked ${l.replace(/^\?\? /, '')}`)].join(
+        ' | '
+      )
     : 'clean'
 );
 
@@ -78,7 +81,9 @@ try {
   // --left-right counts the first operand's side first: with `HEAD...origin/main`, column 0 is how
   // far HEAD is ahead of origin/main, column 1 is how far it is behind. Reading them the other way
   // round rejected the very state this gate exists for — main with the bump commit unpushed.
-  const counts = run('git', ['rev-list', '--left-right', '--count', 'HEAD...origin/main'], { cwd: root }).trim().split(/\s+/);
+  const counts = run('git', ['rev-list', '--left-right', '--count', 'HEAD...origin/main'], { cwd: root })
+    .trim()
+    .split(/\s+/);
   ahead = counts[0];
   behind = counts[1];
 } catch (error) {
@@ -99,20 +104,37 @@ const entry = new RegExp(`^## \\[${escapeRe(version)}\\]`, 'm');
 check(
   `CHANGELOG.md has a section for ${version}`,
   entry.test(changelog),
-  existsSync(changelogPath) ? (entry.test(changelog) ? `"## [${version}]"` : `no "## [${version}]" heading`) : 'CHANGELOG.md is missing'
+  existsSync(changelogPath)
+    ? entry.test(changelog)
+      ? `"## [${version}]"`
+      : `no "## [${version}]" heading`
+    : 'CHANGELOG.md is missing'
 );
 
 // 4. a private package silently cannot be published
-const priv = Object.entries({ '@trade/ui': ui, '@trade/tokens': tokens }).filter(([, m]) => m.private === true).map(([n]) => n);
-check('both packages are publishable (not private)', priv.length === 0, priv.length ? `private: ${priv.join(', ')}` : 'neither is private');
+const priv = Object.entries({ '@trade/ui': ui, '@trade/tokens': tokens })
+  .filter(([, m]) => m.private === true)
+  .map(([n]) => n);
+check(
+  'both packages are publishable (not private)',
+  priv.length === 0,
+  priv.length ? `private: ${priv.join(', ')}` : 'neither is private'
+);
 
 // 5 + 6. the two contracts, reused rather than restated. The packaging contract is what makes the
 //    tarball the release artifact; the package contract carries the version agreement.
-for (const [label, script] of [['the packaging contract passes (check:pack)', 'check-pack.mjs'], ['the package contract passes (check-contract)', 'check-contract.mjs']]) {
+for (const [label, script] of [
+  ['the packaging contract passes (check:pack)', 'check-pack.mjs'],
+  ['the package contract passes (check-contract)', 'check-contract.mjs']
+]) {
   // Report the failing line when there is one: taking the last line of a failed child's output picked a
   // PASS line and printed it beside FAIL, which is the kind of message this repository exists to avoid.
   const pick = (text) => {
-    const lines = String(text).trim().split('\n').map((l) => l.trim()).filter(Boolean);
+    const lines = String(text)
+      .trim()
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
     return lines.find((l) => /\bFAIL\b/.test(l)) ?? lines.slice(-1)[0] ?? '';
   };
   let ok = true;
@@ -134,7 +156,9 @@ for (const [label, script] of [['the packaging contract passes (check:pack)', 'c
 //    the release procedure logs in first (docs/release.md) and this check fails closed without one.
 const already = [];
 const registryTroubles = [];
-const pushTrouble = (message) => { if (!registryTroubles.includes(message)) registryTroubles.push(message); };
+const pushTrouble = (message) => {
+  if (!registryTroubles.includes(message)) registryTroubles.push(message);
+};
 for (const name of PACKAGES) {
   const registry = manifests[name].publishConfig?.registry ?? '';
   // Exact hostname, not a substring — `includes('npm.pkg.github.com')` also matches
@@ -150,9 +174,11 @@ for (const name of PACKAGES) {
       run(npmCommand, npmArgs(['whoami', '--registry', registry]), npmOptions(root));
     } catch (error) {
       const text = String(error.stderr ?? error.message);
-      pushTrouble(/ENEEDAUTH|E401|E403|need auth|logged in|unauthor/i.test(text)
-        ? `not logged in to ${registry} — unauthenticated lookups return the same 404 as "not found": npm login --scope=@trade --auth-type=legacy --registry=${registry}`
-        : `${name}: ${text.split('\n').find((l) => l.trim()) ?? 'unknown error'}`);
+      pushTrouble(
+        /ENEEDAUTH|E401|E403|need auth|logged in|unauthor/i.test(text)
+          ? `not logged in to ${registry} — unauthenticated lookups return the same 404 as "not found": npm login --scope=@trade --auth-type=legacy --registry=${registry}`
+          : `${name}: ${text.split('\n').find((l) => l.trim()) ?? 'unknown error'}`
+      );
       continue;
     }
   }
@@ -163,18 +189,25 @@ for (const name of PACKAGES) {
   } catch (error) {
     const text = String(error.stderr ?? error.message);
     // 404 is the answer we want: the version does not exist yet.
-    if (!/E404|404 Not Found/.test(text)) pushTrouble(`${name}: ${text.split('\n').find((l) => l.trim()) ?? 'unknown error'}`);
+    if (!/E404|404 Not Found/.test(text))
+      pushTrouble(`${name}: ${text.split('\n').find((l) => l.trim()) ?? 'unknown error'}`);
   }
 }
 check(
   `neither package already publishes ${version}`,
   already.length === 0 && registryTroubles.length === 0,
-  already.length ? `already published: ${already.join(', ')}` : registryTroubles.length ? `could not verify the registry — ${registryTroubles.join(' · ')}` : `${PACKAGES.length} packages checked`
+  already.length
+    ? `already published: ${already.join(', ')}`
+    : registryTroubles.length
+      ? `could not verify the registry — ${registryTroubles.join(' · ')}`
+      : `${PACKAGES.length} packages checked`
 );
 
 const failed = checks.filter((c) => !c.ok);
 if (checks.length !== EXPECTED_COUNTS.release) {
-  console.error(`\nrelease: ran ${checks.length} checks, scripts/counts/release.mjs declares ${EXPECTED_COUNTS.release}`);
+  console.error(
+    `\nrelease: ran ${checks.length} checks, scripts/counts/release.mjs declares ${EXPECTED_COUNTS.release}`
+  );
   process.exit(1);
 }
 if (failed.length > 0) {
@@ -182,4 +215,6 @@ if (failed.length > 0) {
   console.error('Fix the preconditions above, not this script. The procedure is documented in docs/release.md.');
   process.exit(1);
 }
-console.log(`\nrelease: ${checks.length}/${checks.length} checks passed — the publish is now a mechanical step (docs/release.md)`);
+console.log(
+  `\nrelease: ${checks.length}/${checks.length} checks passed — the publish is now a mechanical step (docs/release.md)`
+);

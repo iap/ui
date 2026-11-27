@@ -239,6 +239,4 @@ const html = `<!DOCTYPE html>
 `;
 writeFileSync(resolve(out, 'index.html'), html, 'utf8');
 
-console.log(
-  JSON.stringify({ ok: true, out, axeBundled: axe.length > 0, axeBytes: axe.length }, null, 2)
-);
+console.log(JSON.stringify({ ok: true, out, axeBundled: axe.length > 0, axeBytes: axe.length }, null, 2));

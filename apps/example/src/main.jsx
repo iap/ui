@@ -25,7 +25,20 @@ import {
   Tooltip
 } from '@trade/ui';
 
-const NAMES = ['Apple Inc.', 'Microsoft Corp.', 'NVIDIA Corp.', 'Tesla Inc.', 'Amazon.com Inc.', 'Alphabet Inc.', 'Meta Platforms', 'JPMorgan Chase', 'Exxon Mobil', 'E-mini S&P 500', 'Euro / US Dollar', 'Gold Futures'];
+const NAMES = [
+  'Apple Inc.',
+  'Microsoft Corp.',
+  'NVIDIA Corp.',
+  'Tesla Inc.',
+  'Amazon.com Inc.',
+  'Alphabet Inc.',
+  'Meta Platforms',
+  'JPMorgan Chase',
+  'Exxon Mobil',
+  'E-mini S&P 500',
+  'Euro / US Dollar',
+  'Gold Futures'
+];
 
 function makeRows(n) {
   const rows = [];
@@ -77,10 +90,18 @@ function AppBar({ onExport }) {
       </span>
       <Stack direction="row" gap={2} align="center">
         <span className="muted">theme: {theme}</span>
-        <Button variant="ghost" size="sm" onClick={() => setTheme('light')}>Light</Button>
-        <Button variant="ghost" size="sm" onClick={() => setTheme('dark')}>Dark</Button>
-        <Button variant="ghost" size="sm" onClick={() => setTheme('high-contrast')}>Contrast</Button>
-        <Button variant="ghost" size="sm" onClick={() => setTheme('system')}>System</Button>
+        <Button variant="ghost" size="sm" onClick={() => setTheme('light')}>
+          Light
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setTheme('dark')}>
+          Dark
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setTheme('high-contrast')}>
+          Contrast
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setTheme('system')}>
+          System
+        </Button>
       </Stack>
     </div>
   );
@@ -132,8 +153,8 @@ function Watchlist({ onTrade }) {
 function Panel({ tick }) {
   return (
     <p className="panel-note muted">
-      Panel content for this tab. Theme switches restyle the whole page with no React re-render, and the
-      last tick was {tick}.
+      Panel content for this tab. Theme switches restyle the whole page with no React re-render, and the last tick was{' '}
+      {tick}.
     </p>
   );
 }
@@ -179,9 +200,15 @@ function App() {
           />
 
           <Stack direction="row" gap={3} align="center" wrap>
-            <Button variant="primary" onClick={() => openTicket(null)}>New order</Button>
-            <Button variant="outline" onClick={() => setToast('Watchlist refreshed')}>Refresh</Button>
-            <Button variant="danger" disabled>Cancel all</Button>
+            <Button variant="primary" onClick={() => openTicket(null)}>
+              New order
+            </Button>
+            <Button variant="outline" onClick={() => setToast('Watchlist refreshed')}>
+              Refresh
+            </Button>
+            <Button variant="danger" disabled>
+              Cancel all
+            </Button>
             <span className="ui-popover-anchor">
               <Button
                 variant="ghost"
@@ -200,7 +227,9 @@ function App() {
               </Popover>
             </span>
             <Tooltip label="Resubmit the last rejected order" placement="bottom">
-              <Button variant="ghost" size="sm" aria-label="Resubmit last order">↻</Button>
+              <Button variant="ghost" size="sm" aria-label="Resubmit last order">
+                ↻
+              </Button>
             </Tooltip>
             <span className="muted">Click a row to open its order ticket.</span>
           </Stack>
@@ -219,8 +248,12 @@ function App() {
         title={`Order ticket — ${symbol}`}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={submit} disabled={priceError}>Submit order</Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={submit} disabled={priceError}>
+              Submit order
+            </Button>
           </>
         }
       >
@@ -231,7 +264,11 @@ function App() {
           <Field label="Quantity">
             <Input numeric value={qty} onChange={(e) => setQty(e.target.value)} />
           </Field>
-          <Field label="Limit price" hint="Leave blank for market order" error={priceError ? 'Enter a price above 0.00' : undefined}>
+          <Field
+            label="Limit price"
+            hint="Leave blank for market order"
+            error={priceError ? 'Enter a price above 0.00' : undefined}
+          >
             <Input numeric value={price} onChange={(e) => setPrice(e.target.value)} />
           </Field>
           <Field label="Time in force">

@@ -1,0 +1,46 @@
+name: Format
+
+# Keep the default branch formatted. This workflow only runs on pushes to main (or a manual
+# dispatch): PR refs — especially forks — must never be checked out with a write token and
+# committed to. Commits made with GITHUB_TOKEN do not trigger another workflow run, so this
+# cannot loop.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The bot needs write access to repository contents and nothing else.
+permissions:
+  contents: write
+
+# One formatting run per ref; a newer push makes the older one irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: prettier
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.22.2
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Format sources
+        run: npm run format
+      - name: Commit and push formatting changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No formatting changes"
+            exit 0
+          fi
+          git add -A
+          git commit -m "chore: format with prettier"
+          git push

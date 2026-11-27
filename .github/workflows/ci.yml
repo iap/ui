@@ -46,6 +46,8 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
+      - name: Verify formatting (Prettier contract)
+        run: npm run format:check
       - name: Build tokens + library
         run: npm run build
       - name: Assert the library ships zero runtime dependencies
@@ -334,4 +336,3 @@ jobs:
       # No artifact upload here: these gates print their evidence to the job log and write nothing to
       # `verification/` (that directory belongs to the browser suites, which have their own jobs).
       # Uploading a directory nobody writes to would report success while producing nothing.
-

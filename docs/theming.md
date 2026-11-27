@@ -12,9 +12,18 @@ Every theme — `light`, `dark`, `high-contrast` — is a **role → primitive r
 Components only ever read role variables, so they have no idea themes exist:
 
 ```css
-:root                     { --ui-primary: var(--ui-ref-indigo-500); color-scheme: light dark; }
-[data-theme="dark"]       { --ui-primary: var(--ui-ref-indigo-200); color-scheme: dark; }
-[data-theme="high-contrast"] { --ui-primary: var(--ui-ref-indigo-700); color-scheme: light; }
+:root {
+  --ui-primary: var(--ui-ref-indigo-500);
+  color-scheme: light dark;
+}
+[data-theme='dark'] {
+  --ui-primary: var(--ui-ref-indigo-200);
+  color-scheme: dark;
+}
+[data-theme='high-contrast'] {
+  --ui-primary: var(--ui-ref-indigo-700);
+  color-scheme: light;
+}
 ```
 
 Consequences:
@@ -42,7 +51,9 @@ attribute set the page follows the OS.
 ## ThemeProvider and useTheme
 
 ```tsx
-<ThemeProvider theme="light">        // 'light' | 'dark' | 'high-contrast' | 'system' (default)
+<ThemeProvider theme="light">
+  {' '}
+  // 'light' | 'dark' | 'high-contrast' | 'system' (default)
   <Button onClick={() => setTheme('dark')} />
 </ThemeProvider>
 ```

@@ -23,7 +23,13 @@ const P = t.primitive;
 
 const hexToRgb = (h) => {
   const s = h.replace('#', '');
-  const f = s.length === 3 ? s.split('').map((c) => c + c).join('') : s;
+  const f =
+    s.length === 3
+      ? s
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : s;
   return [parseInt(f.slice(0, 2), 16), parseInt(f.slice(2, 4), 16), parseInt(f.slice(4, 6), 16)];
 };
 const lum = ([r, g, b]) => {
@@ -91,7 +97,15 @@ for (const [themeName, roles] of Object.entries(t.themes)) {
     checked++;
     const ratio = contrast(hexToRgb(fg), hexToRgb(bg));
     if (ratio < min) {
-      failures.push({ theme: themeName, pair: `${fgRole} on ${bgRole}`, ratio: Number(ratio.toFixed(2)), min, fg, bg, why });
+      failures.push({
+        theme: themeName,
+        pair: `${fgRole} on ${bgRole}`,
+        ratio: Number(ratio.toFixed(2)),
+        min,
+        fg,
+        bg,
+        why
+      });
     }
   }
 }
@@ -99,7 +113,9 @@ for (const [themeName, roles] of Object.entries(t.themes)) {
 const themes = Object.keys(t.themes);
 console.log(`contrast contract: ${checked} pairs across ${themes.length} themes (${themes.join(', ')})`);
 for (const f of failures) {
-  console.log(`  FAIL  ${f.theme.padEnd(14)} ${f.pair.padEnd(26)} ${String(f.ratio).padStart(5)}:1  (needs ${f.min})  ${f.fg} on ${f.bg}  — ${f.why}`);
+  console.log(
+    `  FAIL  ${f.theme.padEnd(14)} ${f.pair.padEnd(26)} ${String(f.ratio).padStart(5)}:1  (needs ${f.min})  ${f.fg} on ${f.bg}  — ${f.why}`
+  );
 }
 if (!failures.length) {
   console.log('  all pairs pass');

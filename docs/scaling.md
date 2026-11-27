@@ -34,16 +34,16 @@ build fails on role-set divergence — never weaken it.
 Spacing, radius, type, elevation changes are **architecture decisions** (ADR-001): propose in
 `DECISIONS.md` first, then extend the scale. The README change-guide maps every knob:
 
-| To change… | Edit |
-|---|---|
-| Brand/semantic colours | `tokens.json → color` |
-| Space/radius/type/elevation | `tokens.json → space / radius / font / elevation` |
-| Density | `tokens.json → density` |
-| Whether motion exists | `tokens.json → motion.enabled` (keep `false` for v1) |
-| A component's look | `packages/ui/styles/<area>.css` |
-| A component's API/behaviour | `packages/ui/src/components/<Name>.tsx` |
-| Example content | `apps/example/src/main.jsx` |
-| What "correct" means | `scripts/verify.mjs`, `scripts/verify-example.mjs` |
+| To change…                  | Edit                                                 |
+| --------------------------- | ---------------------------------------------------- |
+| Brand/semantic colours      | `tokens.json → color`                                |
+| Space/radius/type/elevation | `tokens.json → space / radius / font / elevation`    |
+| Density                     | `tokens.json → density`                              |
+| Whether motion exists       | `tokens.json → motion.enabled` (keep `false` for v1) |
+| A component's look          | `packages/ui/styles/<area>.css`                      |
+| A component's API/behaviour | `packages/ui/src/components/<Name>.tsx`              |
+| Example content             | `apps/example/src/main.jsx`                          |
+| What "correct" means        | `scripts/verify.mjs`, `scripts/verify-example.mjs`   |
 
 ## Rule zero: every rule gets a gate
 

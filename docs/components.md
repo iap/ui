@@ -11,7 +11,7 @@ ARIA behaviour, [scaling.md](scaling.md) for the recipe to add one.
   exceptions are components with no meaningful native ref: `Stack`, `Field`, `DataTable`, `Tabs`,
   `Dialog`, `Feedback`, `ThemeProvider`.)
 - **`cx()`** — the 4-line helper in `src/internal/cx.ts` joins truthy class parts. Variants,
-  sizes and densities are *classes*, never inline style objects.
+  sizes and densities are _classes_, never inline style objects.
 - **`...rest` spread** — props are destructured, the rest spread onto the native element so
   consumers keep full HTML control.
 - **Native first** — the least-opinionated native element: `Select` is a real `<select>`,
@@ -20,7 +20,7 @@ ARIA behaviour, [scaling.md](scaling.md) for the recipe to add one.
 - **SSR-safe** — any DOM access is guarded by `typeof window/document === 'undefined'`; `Dialog`
   renders inline during SSR instead of portalling.
 - **Density as a prop** — `'comfortable' | 'compact' | 'dense'`, emitted as a modifier class only
-  when set *and* not `comfortable` (comfortable is the CSS default). See [css.md](css.md#density).
+  when set _and_ not `comfortable` (comfortable is the CSS default). See [css.md](css.md#density).
 
 `useTicks` is the one export that is not a component, so only the conventions that apply to it do:
 no inline style objects, SSR-safe (its queue is client-only and a server render uses the initial

@@ -16,8 +16,7 @@ export interface DialogProps {
   closeLabel?: string;
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 /**
  * Modal dialog: scrim, Escape to close, scrim click to close, focus moved in on open

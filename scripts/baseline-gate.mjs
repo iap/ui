@@ -26,10 +26,7 @@ export function baselineSetIsComplete(baselinesDir, platform) {
   try {
     const files = readdirSync(dir);
     return ENGINES.every((e) =>
-      VIEWPORTS.every((vp) =>
-        files.includes(`${e}-${vp}-dark.png`) &&
-        files.includes(`${e}-${vp}-light.png`)
-      )
+      VIEWPORTS.every((vp) => files.includes(`${e}-${vp}-dark.png`) && files.includes(`${e}-${vp}-light.png`))
     );
   } catch {
     return false;

@@ -88,12 +88,7 @@ export function DataTable<T>({
           {spacerBefore > 0 ? <tr aria-hidden="true" style={{ height: spacerBefore }} /> : null}
           {rows.length === 0 && !virtualized ? (
             <tr role="row" aria-rowindex={2}>
-              <td
-                className="ui-table__empty"
-                role="gridcell"
-                aria-colspan={columns.length}
-                colSpan={columns.length}
-              >
+              <td className="ui-table__empty" role="gridcell" aria-colspan={columns.length} colSpan={columns.length}>
                 {emptyMessage}
               </td>
             </tr>
@@ -111,10 +106,7 @@ export function DataTable<T>({
                   <td
                     key={c.key}
                     role="gridcell"
-                    className={cx(
-                      c.numeric && 'ui-cell--numeric',
-                      c.align === 'end' && 'ui-cell--numeric'
-                    )}
+                    className={cx(c.numeric && 'ui-cell--numeric', c.align === 'end' && 'ui-cell--numeric')}
                     style={c.width ? { width: c.width, minWidth: c.width } : undefined}
                   >
                     {c.render ? c.render(row) : ((row as Record<string, unknown>)[c.key] as ReactNode)}

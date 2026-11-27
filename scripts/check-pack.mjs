@@ -78,7 +78,14 @@ for (const dir of PACKAGES) {
     // a lifecycle script can still write to stdout ahead of the JSON, so take the array itself
     manifest = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1))[0];
   } catch (error) {
-    check(`${label}: packs`, false, String(error.stderr ?? error.message).split('\n').slice(0, 3).join(' '));
+    check(
+      `${label}: packs`,
+      false,
+      String(error.stderr ?? error.message)
+        .split('\n')
+        .slice(0, 3)
+        .join(' ')
+    );
     // The command itself is broken, so every assertion below would be vacuous. Say so with a
     // named check instead of skipping them silently: a gate that reports "0/2 packages" and a
     // bare spawn error reads like a packaging regression, when the truth is that no tarball
@@ -116,7 +123,11 @@ for (const dir of PACKAGES) {
 
   // 2. required files
   const missing = REQUIRED.filter((f) => !packed.has(f));
-  check(`${label}: ships the licence files and its manifest`, missing.length === 0, missing.length ? `missing: ${missing.join(', ')}` : 'ok');
+  check(
+    `${label}: ships the licence files and its manifest`,
+    missing.length === 0,
+    missing.length ? `missing: ${missing.join(', ')}` : 'ok'
+  );
 
   // 3. the per-component stylesheets the build promises — a wildcard export would otherwise pass
   //    with any single file present, so compare against the source set rather than "at least one"
@@ -139,7 +150,11 @@ for (const dir of PACKAGES) {
     if (/\.ts$/.test(f) && !f.startsWith('dist/')) return true;
     return false;
   });
-  check(`${label}: leaks no source, tests, scripts, maps or node_modules`, leaked.length === 0, leaked.length ? `leaked: ${leaked.slice(0, 5).join(', ')}` : `${packed.size} files`);
+  check(
+    `${label}: leaks no source, tests, scripts, maps or node_modules`,
+    leaked.length === 0,
+    leaked.length ? `leaked: ${leaked.slice(0, 5).join(', ')}` : `${packed.size} files`
+  );
 
   // 5. the build output is actually in there
   // the UI package ships the bundle plus per-component CSS; tokens ships its CSS and TS module

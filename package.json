@@ -2,7 +2,7 @@
   "name": "ui",
   "private": true,
   "version": "0.1.0",
-  "description": "Project UI \u2014 @trade/ui component system (static CSS, light/dark/high-contrast themes, non-animated)",
+  "description": "Project UI — @trade/ui component system (static CSS, light/dark/high-contrast themes, non-animated)",
   "license": "MIT OR Apache-2.0",
   "workspaces": [
     "packages/*",
@@ -10,6 +10,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspace @trade/tokens && npm run build --workspace @trade/ui",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "verify": "node scripts/verify.mjs",
     "check:contract": "node scripts/check-contract.mjs",
     "check:pack": "node scripts/check-pack.mjs",
@@ -51,7 +53,7 @@
       "gzip": true
     },
     {
-      "name": "@trade/ui ESM, Button only (consumer cost, min+gzip) \u2014 tree-shaking guard",
+      "name": "@trade/ui ESM, Button only (consumer cost, min+gzip) — tree-shaking guard",
       "path": "packages/ui/dist/index.js",
       "import": "{ Button }",
       "ignore": [
@@ -91,6 +93,7 @@
     "pixelmatch": "^7.2.0",
     "playwright": "^1.63.0",
     "pngjs": "^7.0.0",
+    "prettier": "^3.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "size-limit": "^14.1.0",

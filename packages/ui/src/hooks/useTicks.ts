@@ -58,8 +58,7 @@ export function useTicks<T>(initial: T, options: UseTicksOptions = {}): [T, (upd
     queue.current = [];
     setValue((previous) =>
       pending.reduce<T>(
-        (accumulated, update) =>
-          typeof update === 'function' ? (update as (previous: T) => T)(accumulated) : update,
+        (accumulated, update) => (typeof update === 'function' ? (update as (previous: T) => T)(accumulated) : update),
         previous
       )
     );

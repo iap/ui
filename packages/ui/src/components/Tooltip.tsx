@@ -19,7 +19,18 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'chi
  * aria-describedby onto the trigger while visible.
  */
 export const Tooltip = /* @__PURE__ */ forwardRef(function Tooltip(
-  { label, placement = 'top', className, children, onMouseEnter, onMouseLeave, onFocus, onBlur, onKeyDown: consumerOnKeyDown, ...rest }: TooltipProps,
+  {
+    label,
+    placement = 'top',
+    className,
+    children,
+    onMouseEnter,
+    onMouseLeave,
+    onFocus,
+    onBlur,
+    onKeyDown: consumerOnKeyDown,
+    ...rest
+  }: TooltipProps,
   ref: Ref<HTMLSpanElement>
 ) {
   const id = useId();
@@ -48,19 +59,28 @@ export const Tooltip = /* @__PURE__ */ forwardRef(function Tooltip(
     <span
       ref={ref}
       className={cx('ui-tooltip-anchor', className)}
-      onMouseEnter={(e) => { show(); onMouseEnter?.(e); }}
-      onMouseLeave={(e) => { hide(); onMouseLeave?.(e); }}
-      onFocus={(e) => { show(); onFocus?.(e); }}
-      onBlur={(e) => { hide(); onBlur?.(e); }}
+      onMouseEnter={(e) => {
+        show();
+        onMouseEnter?.(e);
+      }}
+      onMouseLeave={(e) => {
+        hide();
+        onMouseLeave?.(e);
+      }}
+      onFocus={(e) => {
+        show();
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        hide();
+        onBlur?.(e);
+      }}
       onKeyDown={handleKeyDown}
       {...rest}
     >
       {isValidElement(children) && open
         ? cloneElement(children as ReactElement<{ 'aria-describedby'?: string }>, {
-            'aria-describedby': [
-              (children.props as { 'aria-describedby'?: string })['aria-describedby'],
-              id
-            ]
+            'aria-describedby': [(children.props as { 'aria-describedby'?: string })['aria-describedby'], id]
               .filter(Boolean)
               .join(' ')
           })

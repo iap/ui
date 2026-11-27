@@ -26,7 +26,14 @@
   font-weight: 500;
 }
 
-.ui-tab:disabled { opacity: var(--ui-opacity-disabled); cursor: not-allowed; }
+.ui-tab:disabled {
+  opacity: var(--ui-opacity-disabled);
+  cursor: not-allowed;
+}
 
-.ui-tabs__panel { padding-top: var(--ui-space-4); }
-.ui-tabs__panel[hidden] { display: none; }
+.ui-tabs__panel {
+  padding-top: var(--ui-space-4);
+}
+.ui-tabs__panel[hidden] {
+  display: none;
+}
