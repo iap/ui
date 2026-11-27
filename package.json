@@ -12,6 +12,7 @@
     "build": "npm run build --workspace @trade/tokens && npm run build --workspace @trade/ui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:format-patch": "node scripts/check-format-patch.mjs",
     "verify": "node scripts/verify.mjs",
     "check:contract": "node scripts/check-contract.mjs",
     "check:pack": "node scripts/check-pack.mjs",

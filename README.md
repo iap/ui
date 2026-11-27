@@ -98,18 +98,19 @@ the built-in `GITHUB_TOKEN` works when the package grants the repository read ac
 
 ## Change guide
 
-| To change…                             | Edit                                                                                                                            |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Brand/semantic colours, light or dark  | `packages/tokens/tokens.json` → `color`                                                                                         |
-| Spacing, radius, type scale, elevation | `packages/tokens/tokens.json` → `space` / `radius` / `font` / `elevation`                                                       |
-| Component density                      | `packages/tokens/tokens.json` → `density` (comfortable 1 / compact .75 / dense .625)                                            |
-| Whether motion exists at all           | `packages/tokens/tokens.json` → `motion.enabled` (keep `false` for v1)                                                          |
-| A component's look                     | `packages/ui/styles/<area>.css`                                                                                                 |
-| A component's API/behaviour            | `packages/ui/src/components/<Name>.tsx`                                                                                         |
-| Example content or instruments         | `apps/example/src/main.jsx`, `apps/example-trading/src/main.jsx`                                                                |
-| What "correct" means                   | `scripts/verify.mjs`, `scripts/verify-example.mjs`, `scripts/verify-example-trading.mjs`                                        |
-| What pixels should look like           | `npm run baselines:update` rewrites `baselines/<platform>/`; the suite compares against it read-only every `verify:browser` run |
-| Source formatting                      | `.prettierrc.json` + `.prettierignore`; `npm run format` rewrites, `npm run format:check` gates in CI                           |
+| To change…                             | Edit                                                                                                                                                                                          |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brand/semantic colours, light or dark  | `packages/tokens/tokens.json` → `color`                                                                                                                                                       |
+| Spacing, radius, type scale, elevation | `packages/tokens/tokens.json` → `space` / `radius` / `font` / `elevation`                                                                                                                     |
+| Component density                      | `packages/tokens/tokens.json` → `density` (comfortable 1 / compact .75 / dense .625)                                                                                                          |
+| Whether motion exists at all           | `packages/tokens/tokens.json` → `motion.enabled` (keep `false` for v1)                                                                                                                        |
+| A component's look                     | `packages/ui/styles/<area>.css`                                                                                                                                                               |
+| A component's API/behaviour            | `packages/ui/src/components/<Name>.tsx`                                                                                                                                                       |
+| Example content or instruments         | `apps/example/src/main.jsx`, `apps/example-trading/src/main.jsx`                                                                                                                              |
+| What "correct" means                   | `scripts/verify.mjs`, `scripts/verify-example.mjs`, `scripts/verify-example-trading.mjs`                                                                                                      |
+| What pixels should look like           | `npm run baselines:update` rewrites `baselines/<platform>/`; the suite compares against it read-only every `verify:browser` run                                                               |
+| Source formatting                      | `.prettierrc.json` + `.prettierignore`; `npm run format` rewrites, `npm run format:check` gates in CI                                                                                         |
+| Fork PR formatting                     | add the `format:apply` label to opt in; `.github/workflows/format-pr.yml` produces a patch, `.github/workflows/format-pr-apply.yml` validates it and pushes a base-repo branch back to the PR |
 
 After any change: `npm run build && npm run example:build && npm run verify && npm run verify:example`.
 
@@ -142,7 +143,7 @@ npm run check:contrast  # 69 colour pairs across 3 themes must meet the contrast
 npm run check:style     # 142 checks: the CSS authoring contract (tokens-only, logical, motionless, guarded :hover, no dead prefix exceptions)
 npm run format:check    # Prettier contract: every source file matches .prettierrc.json
 npm run check:types     # tsc --noEmit over @trade/ui — strict types are a gate, not a suggestion
-npm test                # 18 unit tests for the pure modules (node:test; no browser, no deps)
+npm test                # 19 unit tests for the pure modules (node:test; no browser, no deps)
 npm run check:license   # licence headers + manifests agree (MIT OR Apache-2.0)
 npm run check:docs      # links resolve + documented check counts agree with the suites themselves
 npm run check:support   # 3 checks: the browser floor is derived from what the stylesheets use

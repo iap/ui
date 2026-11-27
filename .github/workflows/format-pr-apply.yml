@@ -1,0 +1,78 @@
+name: Format PR (apply patch)
+
+# Privileged half: runs in the base repo context after the untrusted patch workflow
+# completes. It never checks out or executes PR code — only a validated text patch is
+# applied to a trusted checkout. A fork branch cannot be pushed to with this token,
+# so the result is pushed to a base-repo branch and linked back to the PR.
+on:
+  workflow_run:
+    workflows: ['Format PR (produce patch)']
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: apply validated patch
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Default ref on workflow_run is the base default branch: trusted code only.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download the patch artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: gh run download "$RUN_ID" -n format-patch --dir "$RUNNER_TEMP/format-patch"
+      - name: Validate the patch against the gate
+        run: node scripts/check-format-patch.mjs "$RUNNER_TEMP/format-patch/format.patch"
+      - name: Verify opt-in label, open PR and unchanged head
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          set -euo pipefail
+          PR=$(cat "$RUNNER_TEMP/format-patch/pr_number")
+          HEAD_SHA=$(cat "$RUNNER_TEMP/format-patch/head_sha")
+          case "$PR" in ''|*[!0-9]*) echo "invalid PR number"; exit 1;; esac
+          case "$HEAD_SHA" in ''|*[!0-9a-f]*) echo "invalid head sha"; exit 1;; esac
+          [ "$RUN_EVENT" = pull_request ] || { echo "unexpected triggering event"; exit 1; }
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR}" > "$RUNNER_TEMP/pr.json"
+          node - "$RUNNER_TEMP/pr.json" "$RUNNER_TEMP/format-patch/head_sha" <<'NODE'
+          const fs = require('fs');
+          const pr = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const head = fs.readFileSync(process.argv[3], 'utf8').trim();
+          if (pr.state !== 'open') throw new Error('PR is not open');
+          if (!pr.labels.some((label) => label.name === 'format:apply')) throw new Error('format:apply label missing');
+          if (pr.head.sha !== head) throw new Error('PR head moved since the patch was produced');
+          NODE
+      - name: Apply, commit and link back
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          PR=$(cat "$RUNNER_TEMP/format-patch/pr_number")
+          BRANCH="format/pr-${PR}-${RUN_ID}"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git apply --check "$RUNNER_TEMP/format-patch/format.patch"
+          git apply "$RUNNER_TEMP/format-patch/format.patch"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Patch was already applied upstream; nothing to commit"
+            exit 0
+          fi
+          git switch -c "$BRANCH"
+          git add -A
+          git commit -m "chore: format PR #$PR"
+          git push origin "$BRANCH"
+          COMPARE="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?quick_pull=1&title=chore%3A%20format%20PR%20%23${PR}"
+          gh pr comment "$PR" --body "Prettier produced a formatting-only patch, pushed to \`$BRANCH\`. [Open it as a PR]($COMPARE), or cherry-pick the branch. No files in \`.github/\`, lockfiles or generated output are included."
