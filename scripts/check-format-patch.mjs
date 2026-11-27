@@ -52,9 +52,28 @@ try {
 const paths = [];
 for (const line of patch.split('\n')) {
   const match = /^diff --git a\/(.+) b\/(.+)$/.exec(line);
-  if (!match) continue;
-  paths.push(match[1]);
-  if (match[1] !== match[2]) problems.push(`asymmetric paths: ${match[1]} / ${match[2]}`);
+  if (match) {
+    paths.push(match[1]);
+    if (match[1] !== match[2]) problems.push(`asymmetric paths: ${match[1]} / ${match[2]}`);
+    continue;
+  }
+  if (/^(---|\+\+\+) \/dev\/null$/.test(line)) {
+    problems.push('file creation or deletion is not a formatting change');
+    continue;
+  }
+  const header = /^(---|\+\+\+) ([^/]+)\/(.+)$/.exec(line);
+  if (header) {
+    paths.push(header[3]);
+    if (header[3] === '/dev/null') problems.push('file creation or deletion is not a formatting change');
+    continue;
+  }
+  if (
+    /^(rename from|rename to|copy from|copy to|similarity index|dissimilarity index|old mode|new mode|new file mode|deleted file mode) /.test(
+      line
+    )
+  ) {
+    problems.push(`unsupported patch construct: ${line.split(' ')[0]}`);
+  }
 }
 if (paths.length === 0) problems.push('patch contains no file diffs');
 if (/^GIT binary patch|^Binary files /m.test(patch)) problems.push('binary patches are not allowed');

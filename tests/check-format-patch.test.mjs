@@ -37,4 +37,34 @@ test('format patch gate', (t) => {
   assert.equal(run(root, diff('../secrets.txt')), false, 'traversal is denied');
   assert.equal(run(root, 'GIT binary patch\nliteral 4\nabcd\n'), false, 'binary patches are denied');
   assert.equal(run(root, 'not a patch\n'), false, 'an empty patch is denied');
+
+  const src = 'packages/ui/src/components/Button.tsx';
+  const base = diff(src);
+  assert.equal(
+    run(
+      root,
+      base.replace(
+        '@@ -1 +1 @@',
+        'similarity index 100%\nrename from ' + src + '\nrename to .github/workflows/ci.yml\n@@ -1 +1 @@'
+      )
+    ),
+    false,
+    'a rename into a protected path is denied'
+  );
+  assert.equal(
+    run(root, base.replace('@@ -1 +1 @@', 'new file mode 120000\n@@ -1 +1 @@')),
+    false,
+    'symlink mode is denied'
+  );
+  assert.equal(
+    run(root, base.replace('@@ -1 +1 @@', 'old mode 100644\nnew mode 100755\n@@ -1 +1 @@')),
+    false,
+    'executable-bit changes are denied'
+  );
+  assert.equal(
+    run(root, base.replace('+++ b/' + src, '+++ b/.github/workflows/ci.yml')),
+    false,
+    'header destination is validated'
+  );
+  assert.equal(run(root, base.replace('--- a/' + src, '--- /dev/null')), false, 'file creation is denied');
 });
