@@ -90,6 +90,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
           PR=$(cat "$RUNNER_TEMP/pr_number")
@@ -99,6 +100,8 @@ jobs:
           # The producer diffed against this same PR head. Fetching and switching
           # treats fork code as data; nothing from it is installed or executed.
           git fetch origin "refs/pull/${PR}/head"
+          ACTUAL_SHA=$(git rev-parse FETCH_HEAD)
+          [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ] || { echo "PR head moved after verification; refusing to apply"; exit 1; }
           git switch --detach FETCH_HEAD
           git switch -c "$BRANCH"
           git apply --check "$RUNNER_TEMP/format-patch/format.patch"
